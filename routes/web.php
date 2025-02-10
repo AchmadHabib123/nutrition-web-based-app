@@ -49,11 +49,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Di dalam grup middleware 'auth' dan 'role:admin'
     Route::resource('patients.food-consumptions', FoodConsumptionController::class)->only(['store', 'edit', 'update', 'destroy']);
      // Rute untuk Menu Masakan
-    
-    
-
+ 
 });
-
+Route::get('/patients/filter', [PatientController::class, 'filterByDate']);
 // Rute User
 Route::middleware(['auth', 'role:user'])->prefix('user')->name('user.')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');

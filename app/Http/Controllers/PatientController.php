@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PatientController extends Controller
 {
@@ -119,6 +120,30 @@ class PatientController extends Controller
         ]);
 
         return redirect()->route('admin.patients.index')->with('success', 'Data pasien berhasil diperbarui.');
+    }
+
+    public function filterByDate(Request $request)
+    {
+        $date = $request->query('date');
+
+        if (!$date) {
+            return response()->json(['error' => 'Tanggal tidak valid'], 400);
+        }
+
+        $carbonDate = Carbon::parse($date)->toDateString();
+        
+        // DEBUG: Cek apakah tanggal sudah dikonversi dengan benar
+        \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
+
+        $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
+            ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+            ->get();
+        // DEBUG: Cek apakah data ditemukan
+        if ($patients->isEmpty()) {
+            \Log::info("Tidak ada pasien ditemukan untuk tanggal: " . $carbonDate);
+        }
+
+        return response()->json($patients);
     }
 
     /**

@@ -60,15 +60,6 @@
             </div>
         </div> --}}
     </div>
-    <!-- Informasi Login -->
-    {{-- <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                {{ __("You're logged in!") }}
-            </div>
-        </div>
-    </div> --}}
-
     <!-- Tabel Pasien -->
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -100,8 +91,9 @@
                                 <th class="py-2 px-4 border-b">Detail</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @forelse($patients as $patient)
+                        <tbody id="patients-body">
+                            {{-- <tr><td colspan="6" class="text-center py-4">Memuat data...</td></tr> --}}
+                            {{-- @forelse($patients as $patient)
                                 <tr>
                                     <td class="py-2 px-4 border-b">{{ $patient->no_kamar }}</td>
                                     <td class="py-2 px-4 border-b">{{ $patient->nama_pasien }}</td>
@@ -132,14 +124,15 @@
                                 <tr>
                                     <td colspan="6" class="text-center py-4">Tidak ada data pasien.</td>
                                 </tr>
-                            @endforelse
+                            @endforelse --}}
+                            {{-- @include('admin.patient.partials.patient_rows', ['patients' => $patients]) --}}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    <script>
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
@@ -166,12 +159,272 @@
                 dayCellContent: function(info) {
                     return { html: `<span style="font-size:16px; font-weight:bold;">${info.date.getDate()}</span>` };
                 }
+                dateClick: function(info) {
+                    fetchPatients(info.dateStr);
+                }
+            });
+
+            // Render kalender
+            calendar.render();
+            function fetchPatients(selectedDate) {
+                $.ajax({
+                    url: "{{ route('patients.filter') }}",
+                    type: "GET",
+                    data: { date: selectedDate },
+                    success: function(response) {
+                        $('#patient-table-body').html(response);
+                    },
+                    error: function() {
+                        alert('Gagal mengambil data pasien');
+                    }
+                });
+            }
+        });
+    </script> --}}
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var today = new Date();
+            var selectedDate = today.toISOString().split('T')[0];
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridWeek',
+                initialDate: selectedDate,
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridWeek'
+                },
+                selectable: true,
+                dateClick: function(info) {
+                    selectedDate = info.dateStr;
+                    fetchPatients(selectedDate);
+                }
+            });
+
+            calendar.render();
+            fetchPatients(selectedDate);
+
+            function fetchPatients(date) {
+                fetch(`/admin/patients/filter?date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let tbody = document.getElementById('patients-body');
+                        tbody.innerHTML = '';
+
+                        if (data.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-600">Tidak ada data pasien pada tanggal ini.</td></tr>';
+                            return;
+                        }
+
+                        data.forEach(patient => {
+                            let row = `
+                                <tr>
+                                    <td class="py-2 px-4 border-b">${patient.no_kamar}</td>
+                                    <td class="py-2 px-4 border-b">${patient.nama_pasien}</td>
+                                    <td class="py-2 px-4 border-b">${patient.riwayat_penyakit}</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_makanan} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_harian} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.tipe_pasien}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        document.getElementById('patients-body').innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-600">Gagal mengambil data pasien.</td></tr>';
+                    });
+            }
+        });
+    </script> --}}
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var tableBody = document.querySelector('tbody');
+        
+            var today = new Date();
+            var todayString = today.toISOString().split('T')[0];
+        
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridWeek',  
+                initialDate: todayString,    
+                headerToolbar: {
+                    left: 'prev',
+                    center: 'title',
+                    right: 'next'
+                },
+                views: {
+                    dayGridWeek: {
+                        duration: { weeks: 1 },
+                        dayHeaderFormat: { weekday: 'short' }
+                    }
+                },
+                selectable: true,
+                events:[],
+                dateClick: function(info) {
+                    console.log("Tanggal dipilih:", info.dateStr); // Debugging
+                    fetchPatients(info.dateStr);
+                }
+            });
+        
+            calendar.render();
+        
+            function fetchPatients(date) {
+                console.log("Mengambil data untuk tanggal:", date);
+        
+                fetch(`/patients/filter?date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Data diterima dari server:", data);
+        
+                        tableBody.innerHTML = '';
+        
+                        if (data.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Tidak ada data pasien.</td></tr>`;
+                            return;
+                        }
+        
+                        data.forEach(patient => {
+                            let row = `
+                                <tr>
+                                    <td class="py-2 px-4 border-b">${patient.no_kamar}</td>
+                                    <td class="py-2 px-4 border-b">${patient.nama_pasien}</td>
+                                    <td class="py-2 px-4 border-b">${patient.riwayat_penyakit}</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_makanan} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_harian} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.tipe_pasien}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="/admin/patients/${patient.id}" class="text-blue-500 hover:text-blue-700">Lihat</a>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.innerHTML += row;
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        
+            fetchPatients(todayString);
+        });
+    </script> --}}
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+
+            // Mendapatkan tanggal hari ini
+            var today = new Date();
+            var todayString = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridWeek',  // Menampilkan satu minggu dalam grid
+                initialDate: todayString,    // Tanggal awal kalender adalah hari ini
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridWeek'
+                },
+                views: {
+                    dayGridWeek: {
+                        duration: { weeks: 1 }, // Hanya satu minggu
+                        dayHeaderFormat: { weekday: 'short' } // Hanya menampilkan hari (Su, Mo, Tu, ...)
+                    }
+                },
+                selectable: true,
+                events: [],
+                dayCellContent: function(info) {
+                    return { html: `<span style="font-size:16px; font-weight:bold;">${info.date.getDate()}</span>` };
+                }
             });
 
             // Render kalender
             calendar.render();
         });
+    </script> --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var tableBody = document.querySelector('tbody');
+    
+            var today = new Date();
+            var todayString = today.toISOString().split('T')[0];
+    
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridWeek',
+                initialDate: todayString,
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridWeek'
+                },
+                views: {
+                    dayGridWeek: {
+                        duration: { weeks: 1 },
+                        dayHeaderFormat: { weekday: 'short' }
+                    }
+                },
+                selectable: true,
+                events: [],
+                dayCellContent: function(info) {
+                    return { html: `<span style="font-size:16px; font-weight:bold;">${info.date.getDate()}</span>` };
+                },
+                dateClick: function(info) {
+                    console.log("Tanggal dipilih:", info.dateStr);
+                    fetchPatients(info.dateStr);
+                }
+            });
+    
+            calendar.render();
+    
+            function fetchPatients(date) {
+                console.log("Mengambil data untuk tanggal:", date);
+    
+                fetch(`/patients/filter?date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Data diterima dari server:", data);
+    
+                        tableBody.innerHTML = '';
+    
+                        if (data.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">Tidak ada data pasien.</td></tr>`;
+                            return;
+                        }
+    
+                        data.forEach(patient => {
+                            let row = `
+                                <tr>
+                                    <td class="py-2 px-4 border-b">${patient.no_kamar}</td>
+                                    <td class="py-2 px-4 border-b">${patient.nama_pasien}</td>
+                                    <td class="py-2 px-4 border-b">${patient.riwayat_penyakit}</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_makanan} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.kalori_harian} kcal</td>
+                                    <td class="py-2 px-4 border-b">${patient.tipe_pasien}</td>
+                                    <td class="flex py-2 px-4 border-b">
+                                        <a href="/admin/patients/${patient.id}" class="text-blue-500 hover:text-blue-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.267-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        <a href="/admin/patients/edit/${patient.id}" text-green-500 hover:text-green-700" title="Edit">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m6 0l-3-3m0 0l-3 3m3-3v12" />
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.innerHTML += row;
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+    
+            fetchPatients(todayString);
+        });
     </script>
+      
     <style>
         /* Pastikan hanya satu minggu yang ditampilkan */
         .fc-dayGrid-view .fc-scrollgrid {
@@ -228,52 +481,4 @@
             height: 100px !important;
         }
     </style>
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
-    {{-- <script>
-        function datepicker() {
-            return {
-                selectedDate: moment(),
-                startOfWeek: moment().startOf('week').add(1, 'days'), // Mulai dari Senin minggu ini
-                weekDates: [],
-                
-                init() {
-                    this.generateWeek();
-                },
-
-                generateWeek() {
-                    this.weekDates = Array.from({ length: 7 }, (_, i) => this.startOfWeek.clone().add(i, 'days'));
-                },
-
-                prevWeek() {
-                    this.startOfWeek = this.startOfWeek.subtract(7, 'days'); // Mundur 1 minggu
-                    this.generateWeek();
-                },
-
-                nextWeek() {
-                    this.startOfWeek = this.startOfWeek.add(7, 'days'); // Maju 1 minggu
-                    this.generateWeek();
-                }
-            }
-        }
-    </script> --}}
-
-    {{-- <style>
-        /* Ukuran grid agar hanya satu baris minggu */
-        .fc-dayGrid-view .fc-scrollgrid {
-            height: auto !important;
-        }
-
-        /* Menyesuaikan font dan ukuran */
-        .fc-daygrid-day-number {
-            font-size: 16px;
-            font-weight: bold;
-            padding: 8px;
-        }
-
-        .fc-toolbar-title {
-            font-size: 18px;
-            font-weight: bold;
-        }
-    </style> --}}
 </x-app-layout>

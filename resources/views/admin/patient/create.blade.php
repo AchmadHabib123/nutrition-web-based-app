@@ -76,9 +76,9 @@
                     <!-- Kalori Makanan -->
                     <div class="mt-4">
                         <x-input-label for="kalori_makanan" :value="__('Kalori Makanan (kcal)')" />
-                        {{-- <x-text-input id="kalori_makanan" class="block mt-1 w-full" type="number" name="kalori_makanan" value="{{ old('kalori_makanan') }}" required min="0" />
-                        <x-input-error :messages="$errors->get('kalori_makanan')" class="mt-2" /> --}}
-                        <div class="grid grid-cols-5 gap-2">
+                        <x-text-input id="kalori_makanan" class="block mt-1 w-full" type="number" name="kalori_makanan" value="{{ old('kalori_makanan') }}" required min="0" />
+                        <x-input-error :messages="$errors->get('kalori_makanan')" class="mt-2" />
+                        {{-- <div class="grid grid-cols-5 gap-2">
                             <select id="tipe_makanan" name="makanan_pokok" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
                                 <option value="">-- Pilih Makanan Pokok --</option>
                                 <option value="VVIP" {{ old('tipe_makanan') == 'VVIP' ? 'selected' : '' }}>VVIP</option>
@@ -109,7 +109,7 @@
                                 <option value="VIP" {{ old('tipe_makanan') == 'VIP' ? 'selected' : '' }}>VIP</option>
                                 <option value="Normal" {{ old('tipe_makanan') == 'Normal' ? 'selected' : '' }}>Normal</option>
                             </select>
-                        </div>
+                        </div> --}}
                     </div>
 
                     <div class="mt-4">
