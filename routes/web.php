@@ -43,6 +43,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     Route::resource('menus', MenuController::class);
+    Route::post('/menus/import', [MenuController::class, 'importCsv'])->name('menus.import');
     Route::get('/admin/menus/create', [MenuController::class, 'create'])->name('admin.menus.create');
     // Tambahkan rute admin lainnya di sini
     Route::resource('patients', PatientController::class);

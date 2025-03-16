@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Http;
 use App\Models\Menu;
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use League\Csv\Reader;
 
 class MenuController extends Controller
 {
@@ -181,5 +185,67 @@ class MenuController extends Controller
         return redirect()->route('admin.menus.index')->with('success', 'Menu makanan berhasil diperbarui!');
     }
 
+    // public function importCsv(Request $request)
+    // {
+    //     $request->validate([
+    //         'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+    //     ]);
+
+    //     $file = $request->file('csv_file');
+    //     $path = $file->getRealPath();
+        
+    //     $csv = Reader::createFromPath($path, 'r');
+    //     $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
+        
+    //     $records = $csv->getRecords();
+
+    //     foreach ($records as $record) {
+    //         Menu::create([
+    //             'nama' => $record['name'],
+    //             'protein' => (int) $record['proteins'],
+    //             'karbohidrat' => (int) $record['carbohydrate'],
+    //             'total_lemak' => (int) $record['fat'],
+    //             'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
+    //             'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
+    //             'gambar' => $record['image'], // Pastikan URL gambar dapat diakses atau upload ke storage
+    //         ]);
+    //     }
+
+    //     return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
+    // }
+    public function importCsv(Request $request)
+{
+    $request->validate([
+        'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+    ]);
+
+    $file = $request->file('csv_file');
+    $path = $file->getRealPath();
+    
+    $csv = Reader::createFromPath($path, 'r');
+    $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
+    
+    $records = $csv->getRecords();
+
+    foreach ($records as $record) {
+        // Pastikan nilai gambar tidak lebih dari 255 karakter
+        $imageUrl = $record['image'] ?? null; // Pastikan kolom ada dan tidak null
+        if ($imageUrl && strlen($imageUrl) > 255) {
+            $imageUrl = null; // Bisa juga diisi dengan gambar default jika diinginkan
+        }
+
+        Menu::create([
+            'nama' => $record['name'],
+            'protein' => (int) $record['proteins'],
+            'karbohidrat' => (int) $record['carbohydrate'],
+            'total_lemak' => (int) $record['fat'],
+            'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
+            'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
+            'gambar' => $imageUrl, // Simpan URL jika valid
+        ]);
+    }
+
+    return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
+}
 
 }
