@@ -27,9 +27,20 @@ class MenuController extends Controller
     {
         // $menus = Menu::all()->groupBy('tipe');
         $menus = Menu::all();
+        $menus = Menu::paginate(12);
         return view('admin.menus.index', compact('menus'));
     }
 
+    // public function show(Menu $menu)
+    // {
+    //     $menus = Menu::all();
+    //     return view('admin.menus.show', compact('menus'));
+    // }
+
+    public function show(Menu $menu)
+{
+    return view('admin.menus.show', compact('menu')); // Kirim satu menu saja
+}
     /**
      * Menampilkan form untuk menambahkan menu baru.
      */

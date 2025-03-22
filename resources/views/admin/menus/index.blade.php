@@ -170,83 +170,88 @@
         </div>
     </x-slot>
     <div class="py-7">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-7">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 @foreach($menus as $menu)
-                    <div class="bg-white shadow-sm rounded-lg overflow-hidden relative p-6">
-                        <div class="flex gap-4">
-                            @if($menu->gambar)
-                                @if (Str::startsWith($menu->gambar, ['http://', 'https://']))
-                                    {{-- Jika gambar adalah URL eksternal --}}
-                                    <img src="{{ $menu->gambar }}" alt="{{ $menu->nama }}" class="h-16 object-cover rounded-xl">
+                    <a href="{{ route('admin.menus.show', $menu->id) }}" class="block">
+                        <div class="bg-white shadow-sm rounded-lg overflow-hidden relative p-4">
+                            <div class="flex gap-4">
+                                @if($menu->gambar)
+                                    @if (Str::startsWith($menu->gambar, ['http://', 'https://']))
+                                        {{-- Jika gambar adalah URL eksternal --}}
+                                        <img src="{{ $menu->gambar }}" alt="{{ $menu->nama }}" class="w-16 h-16 rounded-xl">
+                                    @else
+                                        {{-- Jika gambar adalah path lokal di storage --}}
+                                        <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama }}" class="h-16 object-cover rounded-xl">
+                                    @endif
                                 @else
-                                    {{-- Jika gambar adalah path lokal di storage --}}
-                                    <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama }}" class="h-16 object-cover rounded-xl">
+                                    {{-- Gambar default jika tidak ada --}}
+                                    <img src="https://via.placeholder.com/150" alt="Default Image" class="h-16 object-cover rounded-xl">
                                 @endif
-                            @else
-                                {{-- Gambar default jika tidak ada --}}
-                                <img src="https://via.placeholder.com/150" alt="Default Image" class="h-16 object-cover rounded-xl">
-                            @endif
-                            <div class="">
-                                <h3 class="text-lg font-bold">{{ $menu->nama }}</h3>
-                                <div class="text-gray-500">
-                                    <span>
-                                        {{
-                                            ($menu->karbohidrat * 4) + 
-                                            ($menu->protein * 4) + 
-                                            ($menu->total_lemak * 9)
-                                        }} Kalori . 100g
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-0">
-                            <div class="grid grid-cols-3 gap-1 mt-4">
-                                <div class="flex">
-                                    <div class="flex h-5/5 bg-slate-300 items-end rounded-full">
-                                        <div class="bg-green-500 w-3 rounded-full" style="height: {{ $menu->protein}}%;"></div>
-                                    </div>
-                                    <div class="flex flex-col ml-2 text-gray-700">
-                                        <span class="font-semibold text-green-500">Protein:</span> 
-                                        <span>{{ $menu->protein }}g</span>
-                                    </div>
-                                </div>
-                        
-                                <div class="flex">
-                                    <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
-                                        <div class="bg-yellow-500 w-3 rounded-full" style="height: {{ $menu->karbohidrat}}%;"></div>
-                                    </div>
-                                    <div class="flex flex-col ml-2 text-gray-700">
-                                        <span class="font-semibold text-yellow-500">Karbohidrat:</span>
-                                        <span>{{ $menu->karbohidrat }}g</span>
-                                    </div>
-                                </div>
-                        
-                                <div class="flex">
-                                    <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
-                                        <div class="bg-purple-500 w-3 rounded-full" style="height: {{ $menu->total_lemak}}%;"></div>
-                                    </div>
-                                    <div class="flex flex-col ml-2 text-gray-700">
-                                        <span class="font-semibold text-purple-500">Lemak:</span>
-                                        <span>{{ $menu->total_lemak }}g</span>
+                                <div class="">
+                                    <h3 class="text-base font-bold">{{ $menu->nama }}</h3>
+                                    <div class="text-gray-500 text-sm">
+                                        <span>
+                                            {{
+                                                ($menu->karbohidrat * 4) + 
+                                                ($menu->protein * 4) + 
+                                                ($menu->total_lemak * 9)
+                                            }} Kalori . 100g
+                                        </span>
                                     </div>
                                 </div>
                             </div>
+                            <div class="p-0">
+                                <div class="grid grid-cols-3 gap-1 mt-4">
+                                    <div class="flex">
+                                        <div class="flex h-5/5 bg-slate-300 items-end rounded-full">
+                                            <div class="bg-green-500 w-3 rounded-full" style="height: {{ $menu->protein}}%;"></div>
+                                        </div>
+                                        <div class="flex flex-col ml-2 text-gray-700">
+                                            <span class="font-semibold text-green-500 text-sm">Protein:</span> 
+                                            <span>{{ $menu->protein }}g</span>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="flex">
+                                        <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
+                                            <div class="bg-yellow-500 w-3 rounded-full" style="height: {{ $menu->karbohidrat}}%;"></div>
+                                        </div>
+                                        <div class="flex flex-col ml-2 text-gray-700">
+                                            <span class="font-semibold text-yellow-500 text-sm">Karbohidrat:</span>
+                                            <span>{{ $menu->karbohidrat }}g</span>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="flex">
+                                        <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
+                                            <div class="bg-purple-500 w-3 rounded-full" style="height: {{ $menu->total_lemak}}%;"></div>
+                                        </div>
+                                        <div class="flex flex-col ml-2 text-gray-700">
+                                            <span class="font-semibold text-purple-500 text-sm">Lemak:</span>
+                                            <span>{{ $menu->total_lemak }}g</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-gray-500 text-sm mt-2">Tipe Pasien: {{ $menu->tipe_pasien }}</p>
+                            
+                            <div class="absolute top-6 right-6">
+                                <button 
+                                    class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center" 
+                                    onclick="confirmEdit('{{ route('admin.menus.edit', $menu->id) }}')"
+                                >
+                                    <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M17.414 2.586a2 2 0 010 2.828l-2 2-2.828-2.828 2-2a2 2 0 012.828 0zm-3.828 3.828L5 15l-2.5.5.5-2.5L13.586 4l2.828 2.828z" />
+                                    </svg>
+                                </button>
+                            </div>                        
                         </div>
-                        <p class="text-gray-500 text-sm mt-2">Tipe Pasien: {{ $menu->tipe_pasien }}</p>
-                        
-                        <div class="absolute top-6 right-6">
-                            <button 
-                                class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center" 
-                                onclick="confirmEdit('{{ route('admin.menus.edit', $menu->id) }}')"
-                            >
-                                <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path d="M17.414 2.586a2 2 0 010 2.828l-2 2-2.828-2.828 2-2a2 2 0 012.828 0zm-3.828 3.828L5 15l-2.5.5.5-2.5L13.586 4l2.828 2.828z" />
-                                </svg>
-                            </button>
-                        </div>                        
-                    </div>
+                    </a>
                 @endforeach
+            </div>
+            <div class="mt-6">
+                {{ $menus->links() }}
             </div>
         </div>
     </div>
