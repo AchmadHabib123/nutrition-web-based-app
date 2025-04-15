@@ -2,13 +2,48 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between">
+        <div class="flex flex-col justify-between gap-2">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Bahan Makanan') }}
             </h2>
-            <a href="{{ route('admin.menus.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                Tambah Bahan Makanan
-            </a>
+            <div class="flex gap-3 w-full">
+                {{-- <input class="w-full rounded-md" type="search" placeholder="Search">
+                <button href="{{ route('admin.menus.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                </button> --}}
+                <form method="GET" action="{{ route('admin.menus.index') }}" class="flex flex-col md:flex-row gap-3 w-full mb-4">
+                    <!-- Input Pencarian -->
+                    <input 
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="w-full md:w-1/2 rounded-md border-gray-300 shadow-sm"
+                        type="search" 
+                        placeholder="Cari nama bahan makanan..."
+                        onkeydown="if(event.key === 'Enter'){ this.form.submit(); }">
+                
+                    <!-- Dropdown Filter Kategori -->
+                    <select 
+                        name="kategori" 
+                        class="w-full md:w-1/3 rounded-md border-gray-300 shadow-sm"
+                        onchange="this.form.submit()"
+                    >
+                        <option value="">Semua Kategori</option>
+                        @foreach ($kategoriOptions as $kategori)
+                            <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
+                                {{ ucfirst($kategori) }}
+                            </option>
+                        @endforeach
+                    </select>
+                
+                    <!-- Tombol Tambah -->
+                    <a href="{{ route('admin.menus.create') }}" class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-500">
+                        Tambah
+                    </a>
+                </form>
+                
+            </div>
         </div>
     </x-slot>
     <div class="py-7">

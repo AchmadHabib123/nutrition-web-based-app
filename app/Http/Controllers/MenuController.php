@@ -23,14 +23,37 @@ class MenuController extends Controller
     /**
      * Menampilkan daftar menu.
      */
-    public function index()
+    // public function index()
+    // {
+    //     // $menus = Menu::all()->groupBy('tipe');
+    //     $menus = Menu::all();
+    //     $menus = Menu::paginate(12);
+    //     return view('admin.menus.index', compact('menus'));
+    // }
+    public function index(Request $request)
     {
-        // $menus = Menu::all()->groupBy('tipe');
-        $menus = Menu::all();
-        $menus = Menu::paginate(12);
-        return view('admin.menus.index', compact('menus'));
-    }
+        $query = Menu::query();
 
+        // Filter pencarian berdasarkan nama
+        if ($request->filled('search')) {
+            $query->where('nama', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter berdasarkan kategori_bahan_masakan
+        if ($request->filled('kategori')) {
+            $query->where('kategori_bahan_masakan', $request->kategori);
+        }
+
+        // Ambil data kategori unik untuk filter dropdown
+        $kategoriOptions = Menu::select('kategori_bahan_masakan')
+            ->distinct()
+            ->pluck('kategori_bahan_masakan');
+
+        // Ambil hasil akhir dengan paginasi
+        $menus = $query->paginate(12);
+
+        return view('admin.menus.index', compact('menus', 'kategoriOptions'));
+    }
     // public function show(Menu $menu)
     // {
     //     $menus = Menu::all();
