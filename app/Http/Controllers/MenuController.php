@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
+use Carbon\Carbon;
 
 class MenuController extends Controller
 {
@@ -30,27 +31,47 @@ class MenuController extends Controller
     //     $menus = Menu::paginate(12);
     //     return view('admin.menus.index', compact('menus'));
     // }
+    // public function index(Request $request)
+    // {
+    //     $query = Menu::query();
+
+    //     // Filter pencarian berdasarkan nama
+    //     if ($request->filled('search')) {
+    //         $query->where('nama', 'like', '%' . $request->search . '%');
+    //     }
+
+    //     // Filter berdasarkan kategori_bahan_masakan
+    //     if ($request->filled('kategori')) {
+    //         $query->where('kategori_bahan_masakan', $request->kategori);
+    //     }
+
+    //     // Ambil data kategori unik untuk filter dropdown
+    //     $kategoriOptions = Menu::select('kategori_bahan_masakan')
+    //         ->distinct()
+    //         ->pluck('kategori_bahan_masakan');
+
+    //     // Ambil hasil akhir dengan paginasi
+    //     $menus = $query->paginate(12);
+
+    //     return view('admin.menus.index', compact('menus', 'kategoriOptions'));
+    // }
     public function index(Request $request)
     {
-        $query = Menu::query();
+        $menus = Menu::query()
+            ->when($request->search, fn($q) =>
+                $q->where('nama', 'like', '%' . $request->search . '%'))
+            ->when($request->kategori, fn($q) =>
+                $q->where('kategori_bahan_masakan', $request->kategori))
+            ->when($request->updated, function ($q) use ($request) {
+                if ($request->updated) {
+                    $q->where('updated_at', '>=', Carbon::now()->subDays((int)$request->updated));
+                }
+            })
+            ->latest()
+            ->paginate(12)
+            ->appends($request->all());
 
-        // Filter pencarian berdasarkan nama
-        if ($request->filled('search')) {
-            $query->where('nama', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter berdasarkan kategori_bahan_masakan
-        if ($request->filled('kategori')) {
-            $query->where('kategori_bahan_masakan', $request->kategori);
-        }
-
-        // Ambil data kategori unik untuk filter dropdown
-        $kategoriOptions = Menu::select('kategori_bahan_masakan')
-            ->distinct()
-            ->pluck('kategori_bahan_masakan');
-
-        // Ambil hasil akhir dengan paginasi
-        $menus = $query->paginate(12);
+        $kategoriOptions = Menu::select('kategori_bahan_masakan')->distinct()->pluck('kategori_bahan_masakan');
 
         return view('admin.menus.index', compact('menus', 'kategoriOptions'));
     }
