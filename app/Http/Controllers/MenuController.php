@@ -63,11 +63,32 @@ class MenuController extends Controller
             ->when($request->kategori, fn($q) =>
                 $q->where('kategori_bahan_masakan', $request->kategori))
             ->when($request->updated, function ($q) use ($request) {
-                if ($request->updated) {
-                    $q->where('updated_at', '>=', Carbon::now()->subDays((int)$request->updated));
+                // if ($request->updated) {
+                //     $q->where('updated_at', '>=', Carbon::now()->subDays((int)$request->updated));
+                // }
+                switch ($request->updated) {
+                    case 'today':
+                        $q->whereDate('updated_at', Carbon::today());
+                        break;
+                    case 'last7':
+                        $q->where('updated_at', '>=', Carbon::now()->subDays(7));
+                        break;
+                    case 'last30':
+                        $q->where('updated_at', '>=', Carbon::now()->subDays(30));
+                        break;
+                    case 'custom':
+                        if ($request->from && $request->to) {
+                            $from = Carbon::createFromFormat('Y-m-d', $request->from)->startOfDay();
+                            $to = Carbon::createFromFormat('Y-m-d', $request->to)->endOfDay();
+                            $q->whereBetween('updated_at', [$from, $to]);
+                        }
+                        break;
+                    default:
+                        // "anytime", do nothing
+                        break;
                 }
             })
-            ->latest()
+            ->orderBy('nama', 'asc')
             ->paginate(12)
             ->appends($request->all());
 
