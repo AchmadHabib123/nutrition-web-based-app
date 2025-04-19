@@ -91,8 +91,13 @@
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 13.414V18a1 1 0 01-1.447.894l-4-2A1 1 0 018 16v-2.586L3.293 6.707A1 1 0 013 6V4z" />
                     </svg>
                 </button>
+                <button onclick="window.location='{{ route('admin.menus.create') }}'" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Tambah
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                </button>
             </div>
-
             <!-- Floating Filter Panel -->
             <div id="filterPanel" class="absolute top-20 left-0 bg-white shadow-xl border rounded-lg p-5 w-full md:w-96 z-50 hidden">
                 <form id="filterForm" action="{{ route('admin.menus.index') }}" method="GET">

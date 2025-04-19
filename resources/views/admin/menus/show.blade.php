@@ -65,6 +65,12 @@
                                 <span>{{ $menu->total_lemak }}g</span>
                             </div>
                         </div>
+                        <div class="flex">
+                            <div class="ml-2 text-gray-700">
+                                <span class="font-semibold text-purple-500">Stok:</span>
+                                <span>{{ $menu->stok }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
     

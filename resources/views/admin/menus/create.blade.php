@@ -62,7 +62,10 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="mb-4">
+                        <label for="stok" class="block text-gray-700">Stok (jumlah unit/bahan)</label>
+                        <input type="number" name="stok" id="stok" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm" required>
+                    </div>                    
                     <div class="mt-6">
                         <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Simpan</button>
                     </div>

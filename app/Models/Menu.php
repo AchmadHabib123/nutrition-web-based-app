@@ -17,6 +17,7 @@ class Menu extends Model
         'total_lemak',
         'tipe_pasien',
         'kategori_bahan_masakan',
+        'stok',
     ];
     
 

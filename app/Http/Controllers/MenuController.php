@@ -156,6 +156,7 @@ class MenuController extends Controller
             'total_lemak' => 'required|integer|min:0',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
             'kategori_bahan_masakan' => 'required|in:makanan_pokok,lauk,sayur,buah,susu',
+            'stok' => 'required|integer|min:0',
         ]);
 
         if ($request->hasFile('gambar')) {
@@ -246,6 +247,7 @@ class MenuController extends Controller
             'total_lemak' => 'required|integer|min:0',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
             'kategori_bahan_masakan' => 'required|in:makanan_pokok,lauk,sayur,buah,susu',
+            'stok' => 'required|integer|min:0',
         ]);
 
         if ($request->hasFile('gambar')) {
