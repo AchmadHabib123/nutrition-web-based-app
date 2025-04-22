@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BahanMakanan;
 use Illuminate\Support\Facades\Http;
 use App\Models\Menu;
 use App\Models\Patient;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
 use Carbon\Carbon;
 
-class MenuController extends Controller
+class BahanMakananController extends Controller
 {
     /**
      * Konstruktor untuk menerapkan middleware.
@@ -26,10 +27,10 @@ class MenuController extends Controller
      */
     // public function index()
     // {
-    //     // $menus = Menu::all()->groupBy('tipe');
-    //     $menus = Menu::all();
-    //     $menus = Menu::paginate(12);
-    //     return view('admin.menus.index', compact('menus'));
+    //     // $bahanMakanans = Menu::all()->groupBy('tipe');
+    //     $bahanMakanans = Menu::all();
+    //     $bahanMakanans = Menu::paginate(12);
+    //     return view('admin.bahan_makanans.index', compact('bahan_makanans'));
     // }
     // public function index(Request $request)
     // {
@@ -51,13 +52,13 @@ class MenuController extends Controller
     //         ->pluck('kategori_bahan_masakan');
 
     //     // Ambil hasil akhir dengan paginasi
-    //     $menus = $query->paginate(12);
+    //     $bahanMakanans = $query->paginate(12);
 
-    //     return view('admin.menus.index', compact('menus', 'kategoriOptions'));
+    //     return view('admin.bahan_makanans.index', compact('bahan_makanans', 'kategoriOptions'));
     // }
     public function index(Request $request)
     {
-        $menus = Menu::query()
+        $bahanMakanans = BahanMakanan::query()
             ->when($request->search, fn($q) =>
                 $q->where('nama', 'like', '%' . $request->search . '%'))
             ->when($request->kategori, fn($q) =>
@@ -92,26 +93,26 @@ class MenuController extends Controller
             ->paginate(12)
             ->appends($request->all());
 
-        $kategoriOptions = Menu::select('kategori_bahan_masakan')->distinct()->pluck('kategori_bahan_masakan');
+        $kategoriOptions = BahanMakanan::select('kategori_bahan_masakan')->distinct()->pluck('kategori_bahan_masakan');
 
-        return view('admin.menus.index', compact('menus', 'kategoriOptions'));
+        return view('admin.bahan_makanans.index', compact('bahanMakanans', 'kategoriOptions'));
     }
-    // public function show(Menu $menu)
+    // public function show(Menu $bahanMakanan)
     // {
-    //     $menus = Menu::all();
-    //     return view('admin.menus.show', compact('menus'));
+    //     $bahanMakanans = Menu::all();
+    //     return view('admin.bahan_makanans.show', compact('bahan_makanans'));
     // }
 
-    public function show(Menu $menu)
+    public function show(BahanMakanan $bahanMakanan)
 {
-    return view('admin.menus.show', compact('menu')); // Kirim satu menu saja
+    return view('admin.bahan_makanans.show', compact('bahanMakanan')); // Kirim satu menu saja
 }
     /**
      * Menampilkan form untuk menambahkan menu baru.
      */
     public function create()
     {
-        return view('admin.menus.create');
+        return view('admin.bahan_makanans.create');
     }
 
     /**
@@ -136,7 +137,7 @@ class MenuController extends Controller
         // }
 
         // // Simpan menu
-        // $menu = Menu::create([
+        // $bahanMakanan = Menu::create([
         //     'tipe' => $request->tipe,
         //     'nama_makanan' => $request->nama_makanan,
         //     'kalori' => $request->kalori,
@@ -147,7 +148,7 @@ class MenuController extends Controller
         //     'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
         // ]);
 
-        // return redirect()->route('admin.menus.index')->with('success', 'Menu baru berhasil ditambahkan dan kalori pasien diperbarui.');
+        // return redirect()->route('admin.bahan_makanans.index')->with('success', 'Menu baru berhasil ditambahkan dan kalori pasien diperbarui.');
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -160,12 +161,12 @@ class MenuController extends Controller
         ]);
 
         if ($request->hasFile('gambar')) {
-            $validated['gambar'] = $request->file('gambar')->store('images/menus', 'public');
+            $validated['gambar'] = $request->file('gambar')->store('images/bahan_makanans', 'public');
         }
 
-        Menu::create($validated);
+        BahanMakanan::create($validated);
 
-        return redirect()->route('admin.menus.index')->with('success', 'Menu makanan berhasil ditambahkan!');
+        return redirect()->route('admin.bahan_makanans.index')->with('success', 'Menu makanan berhasil ditambahkan!');
     }
 
 
@@ -173,16 +174,16 @@ class MenuController extends Controller
     /**
      * Menampilkan form untuk mengedit menu.
      */
-//     public function edit(Menu $menu)
+//     public function edit(Menu $bahanMakanan)
 //     {
     //         $tipe_options = ['VVIP', 'VIP', 'Normal'];
-    //         return view('admin.menus.edit', compact('menu', 'tipe_options'));
+    //         return view('admin.bahan_makanans.edit', compact('menu', 'tipe_options'));
     //     }
 
     //     /**
     //      * Memperbarui menu.
     //      */
-    //     public function update(Request $request, Menu $menu)
+    //     public function update(Request $request, Menu $bahanMakanan)
     // {
     //     // Validasi data
     //     $request->validate([
@@ -194,7 +195,7 @@ class MenuController extends Controller
     //     // Cek duplikasi
     //     $exists = Menu::where('tipe', $request->tipe)
     //                   ->where('nama_makanan', $request->nama_makanan)
-    //                   ->where('id', '!=', $menu->id)
+    //                   ->where('id', '!=', $bahanMakanan->id)
     //                   ->exists();
 
     //     if ($exists) {
@@ -202,7 +203,7 @@ class MenuController extends Controller
     //     }
 
     //     // Update menu
-    //     $menu->update([
+    //     $bahanMakanan->update([
     //         'tipe' => $request->tipe,
     //         'nama_makanan' => $request->nama_makanan,
     //         'kalori' => $request->kalori,
@@ -213,31 +214,31 @@ class MenuController extends Controller
     //         'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
     //     ]);
 
-    //     return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil diperbarui dan kalori pasien diperbarui.');
+    //     return redirect()->route('admin.bahan_makanans.index')->with('success', 'Menu berhasil diperbarui dan kalori pasien diperbarui.');
     // }
 
 
 //     /**
 //      * Menghapus menu.
 //      */
-//     public function destroy(Menu $menu)
+//     public function destroy(Menu $bahanMakanan)
 // {
-//     $tipe = $menu->tipe;
-//     $menu->delete();
+//     $tipe = $bahanMakanan->tipe;
+//     $bahanMakanan->delete();
 
 //     // Perbarui kalori_makanan untuk semua pasien dengan tipe yang sama
 //     Patient::where('tipe_pasien', $tipe)->update([
 //         'kalori_makanan' => Menu::where('tipe', $tipe)->sum('kalori'),
 //     ]);
 
-//     return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil dihapus dan kalori pasien diperbarui.');
+//     return redirect()->route('admin.bahan_makanans.index')->with('success', 'Menu berhasil dihapus dan kalori pasien diperbarui.');
 // }
-    public function edit(Menu $menu)
+    public function edit(BahanMakanan $bahanMakanan)
     {
-        return view('admin.menus.edit', compact('menu'));
+        return view('admin.bahan_makanans.edit', compact('bahanMakanan'));
     }
 
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, BahanMakanan $bahanMakanan)
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
@@ -252,15 +253,15 @@ class MenuController extends Controller
 
         if ($request->hasFile('gambar')) {
             // Hapus gambar lama
-            if ($menu->gambar) {
-                Storage::disk('public')->delete($menu->gambar);
+            if ($bahanMakanan->gambar) {
+                Storage::disk('public')->delete($bahanMakanan->gambar);
             }
-            $validated['gambar'] = $request->file('gambar')->store('images/menus', 'public');
+            $validated['gambar'] = $request->file('gambar')->store('images/bahan_makanans', 'public');
         }
 
-        $menu->update($validated);
+        $bahanMakanan->update($validated);
 
-        return redirect()->route('admin.menus.index')->with('success', 'Menu makanan berhasil diperbarui!');
+        return redirect()->route('admin.bahan_makanans.index')->with('success', 'Menu makanan berhasil diperbarui!');
     }
 
     // public function importCsv(Request $request)
@@ -289,7 +290,7 @@ class MenuController extends Controller
     //         ]);
     //     }
 
-    //     return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
+    //     return redirect()->route('admin.bahan_makanans.index')->with('success', 'Data dari CSV berhasil diimpor!');
     // }
     public function importCsv(Request $request)
 {
@@ -312,7 +313,7 @@ class MenuController extends Controller
             $imageUrl = null; // Bisa juga diisi dengan gambar default jika diinginkan
         }
 
-        Menu::create([
+        BahanMakanan::create([
             'nama' => $record['name'],
             'protein' => (int) $record['proteins'],
             'karbohidrat' => (int) $record['carbohydrate'],
@@ -323,7 +324,7 @@ class MenuController extends Controller
         ]);
     }
 
-    return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
+    return redirect()->route('admin.bahan_makanans.index')->with('success', 'Data dari CSV berhasil diimpor!');
 }
 
 }

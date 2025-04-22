@@ -1,4 +1,4 @@
-<!-- resources/views/admin/menus/index.blade.php -->
+<!-- resources/views/admin/bahan_makanans/index.blade.php -->
 
 <x-app-layout>
     <x-slot name="header">
@@ -7,7 +7,7 @@
                 {{ __('Bahan Makanan') }}
             </h2>
             {{-- <div class="flex gap-3 w-full">
-                <form id="searchForm" method="GET" action="{{ route('admin.menus.index') }}" class="relative w-full max-w-xl mb-4">
+                <form id="searchForm" method="GET" action="{{ route('admin.bahan_makanans.index') }}" class="relative w-full max-w-xl mb-4">
                     <div class="flex items-center border border-blue-400 rounded-full px-3 py-1 shadow-sm focus-within:ring-2 focus-within:ring-blue-300">
                         <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1116.65 2.5a7.5 7.5 0 010 15z" />
@@ -21,7 +21,7 @@
                             onkeydown="if(event.key === 'Enter'){ this.form.submit(); }"
                         >
                         @if(request('search'))
-                            <a href="{{ route('admin.menus.index') }}" class="text-gray-500 hover:text-red-600">
+                            <a href="{{ route('admin.bahan_makanans.index') }}" class="text-gray-500 hover:text-red-600">
                                 &times;
                             </a>
                         @endif
@@ -73,12 +73,12 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.41-1.41l5.38 5.38a1 1 0 01-1.42 1.42l-5.37-5.38zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd" />
                     </svg>
-                    <form action="{{ route('admin.menus.index') }}" method="GET" class="w-full flex">
+                    <form action="{{ route('admin.bahan_makanans.index') }}" method="GET" class="w-full flex">
                         <input type="text" name="search" placeholder="Search" value="{{ request('search') }}"
                             class="w-full outline-none bg-transparent" />
                     </form>
                     @if(request('search'))
-                        <a href="{{ route('admin.menus.index') }}" class="ml-2 text-gray-500 hover:text-red-500">
+                        <a href="{{ route('admin.bahan_makanans.index') }}" class="ml-2 text-gray-500 hover:text-red-500">
                             &#10005;
                         </a>
                     @endif
@@ -91,7 +91,7 @@
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 13.414V18a1 1 0 01-1.447.894l-4-2A1 1 0 018 16v-2.586L3.293 6.707A1 1 0 013 6V4z" />
                     </svg>
                 </button>
-                <button onclick="window.location='{{ route('admin.menus.create') }}'" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <button onclick="window.location='{{ route('admin.bahan_makanans.create') }}'" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     Tambah
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
@@ -100,7 +100,7 @@
             </div>
             <!-- Floating Filter Panel -->
             <div id="filterPanel" class="absolute top-20 left-0 bg-white shadow-xl border rounded-lg p-5 w-full md:w-96 z-50 hidden">
-                <form id="filterForm" action="{{ route('admin.menus.index') }}" method="GET">
+                <form id="filterForm" action="{{ route('admin.bahan_makanans.index') }}" method="GET">
                     <!-- Hidden input to maintain search value -->
                     <input type="hidden" name="search" value="{{ request('search') }}">
                     
@@ -150,30 +150,30 @@
     <div class="py-7">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-7">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                @foreach($menus as $menu)
+                @foreach($bahanMakanans as $bahanMakanan)
                     <div class="bg-white shadow-sm rounded-lg overflow-hidden relative p-4">
-                        <a href="{{ route('admin.menus.show', $menu->id) }}" class="block">
+                        <a href="{{ route('admin.bahan_makanans.show', $bahanMakanan->id) }}" class="block">
                             <div class="flex gap-4">
-                                @if($menu->gambar)
-                                    @if (Str::startsWith($menu->gambar, ['http://', 'https://']))
+                                @if($bahanMakanan->gambar)
+                                    @if (Str::startsWith($bahanMakanan->gambar, ['http://', 'https://']))
                                         {{-- Jika gambar adalah URL eksternal --}}
-                                        <img src="{{ $menu->gambar }}" alt="{{ $menu->nama }}" class="w-16 h-16 rounded-xl">
+                                        <img src="{{ $bahanMakanan->gambar }}" alt="{{ $bahanMakanan->nama }}" class="w-16 h-16 rounded-xl">
                                     @else
                                         {{-- Jika gambar adalah path lokal di storage --}}
-                                        <img src="{{ asset('storage/' . $menu->gambar) }}" alt="{{ $menu->nama }}" class="h-16 object-cover rounded-xl">
+                                        <img src="{{ asset('storage/' . $bahanMakanan->gambar) }}" alt="{{ $bahanMakanan->nama }}" class="h-16 object-cover rounded-xl">
                                     @endif
                                 @else
                                     {{-- Gambar default jika tidak ada --}}
                                     <img src="https://via.placeholder.com/150" alt="Default Image" class="h-16 object-cover rounded-xl">
                                 @endif
                                 <div class="">
-                                    <h3 class="text-base font-bold">{{ $menu->nama }}</h3>
+                                    <h3 class="text-base font-bold">{{ $bahanMakanan->nama }}</h3>
                                     <div class="text-gray-500 text-sm">
                                         <span>
                                             {{
-                                                ($menu->karbohidrat * 4) + 
-                                                ($menu->protein * 4) + 
-                                                ($menu->total_lemak * 9)
+                                                ($bahanMakanan->karbohidrat * 4) + 
+                                                ($bahanMakanan->protein * 4) + 
+                                                ($bahanMakanan->total_lemak * 9)
                                             }} Kalori . 100g
                                         </span>
                                     </div>
@@ -183,41 +183,41 @@
                                 <div class="grid grid-cols-3 gap-1 mt-4">
                                     <div class="flex">
                                         <div class="flex h-5/5 bg-slate-300 items-end rounded-full">
-                                            <div class="bg-green-500 w-3 rounded-full" style="height: {{ $menu->protein}}%;"></div>
+                                            <div class="bg-green-500 w-3 rounded-full" style="height: {{ $bahanMakanan->protein}}%;"></div>
                                         </div>
                                         <div class="flex flex-col ml-2 text-gray-700">
                                             <span class="font-semibold text-green-500 text-sm">Protein:</span> 
-                                            <span>{{ $menu->protein }}g</span>
+                                            <span>{{ $bahanMakanan->protein }}g</span>
                                         </div>
                                     </div>
                             
                                     <div class="flex">
                                         <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
-                                            <div class="bg-yellow-500 w-3 rounded-full" style="height: {{ $menu->karbohidrat}}%;"></div>
+                                            <div class="bg-yellow-500 w-3 rounded-full" style="height: {{ $bahanMakanan->karbohidrat}}%;"></div>
                                         </div>
                                         <div class="flex flex-col ml-2 text-gray-700">
                                             <span class="font-semibold text-yellow-500 text-sm">Karbohidrat:</span>
-                                            <span>{{ $menu->karbohidrat }}g</span>
+                                            <span>{{ $bahanMakanan->karbohidrat }}g</span>
                                         </div>
                                     </div>
                             
                                     <div class="flex">
                                         <div class="flex h-[100%] bg-slate-300 rounded-full items-end">
-                                            <div class="bg-purple-500 w-3 rounded-full" style="height: {{ $menu->total_lemak}}%;"></div>
+                                            <div class="bg-purple-500 w-3 rounded-full" style="height: {{ $bahanMakanan->total_lemak}}%;"></div>
                                         </div>
                                         <div class="flex flex-col ml-2 text-gray-700">
                                             <span class="font-semibold text-purple-500 text-sm">Lemak:</span>
-                                            <span>{{ $menu->total_lemak }}g</span>
+                                            <span>{{ $bahanMakanan->total_lemak }}g</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-gray-500 text-sm mt-2">Tipe Pasien: {{ $menu->tipe_pasien }}</p>
+                            <p class="text-gray-500 text-sm mt-2">Tipe Pasien: {{ $bahanMakanan->tipe_pasien }}</p>
                         </a>
                         <div class="absolute top-6 right-6">
                             <button 
                                 class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center" 
-                                onclick="confirmEdit('{{ route('admin.menus.edit', $menu->id) }}')"
+                                onclick="confirmEdit('{{ route('admin.bahan_makanans.edit', $bahanMakanan->id) }}')"
                             >
                                 <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path d="M17.414 2.586a2 2 0 010 2.828l-2 2-2.828-2.828 2-2a2 2 0 012.828 0zm-3.828 3.828L5 15l-2.5.5.5-2.5L13.586 4l2.828 2.828z" />
@@ -228,7 +228,7 @@
                 @endforeach
             </div>
             <div class="mt-6">
-                {{ $menus->links() }}
+                {{ $bahanMakanans->links() }}
             </div>
         </div>
     </div>

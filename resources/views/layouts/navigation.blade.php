@@ -15,10 +15,10 @@
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('admin.menus.index') }}" :active="request()->routeIs('admin.menus')">
+                    <x-nav-link href="{{ route('admin.bahan_makanans.index') }}" :active="request()->routeIs('admin.bahan_makanans')">
                         {{ __('Bahan Makanan') }}
                     </x-nav-link>
-                    <x-nav-link href="{{ route('admin.menus.index') }}" :active="request()->routeIs('admin.menus')">
+                    <x-nav-link href="{{ route('admin.bahan_makanans.index') }}" :active="request()->routeIs('admin.bahan_makanans')">
                         {{ __('Operasional') }}
                     </x-nav-link>                       
                 </div>
@@ -36,7 +36,7 @@
 
                         <!-- Dropdown Panel -->
                         <div x-show="open" @click.away="open = false" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg z-50">
-                            <div class="py-1 bg-white rounded-md shadow-xs" role="menu" aria-orientation="vertical" aria-labelledby="user-menu">
+                            <div class="py-1 bg-white rounded-md shadow-xs" role="bahan_makanan aria-orientation="vertical" aria-labelledby="user-bahan_makanan>
                                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                                     {{ __('Pengaturan Profil') }}
                                 </a>

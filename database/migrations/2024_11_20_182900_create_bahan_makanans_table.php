@@ -4,14 +4,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMenusTable extends Migration
+class CreateBahanMakanansTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('menus', function (Blueprint $table) {
+        Schema::create('bahan_makanans', function (Blueprint $table) {
             $table->id();
             $table->string('nama'); // Nama makanan
             $table->string('gambar')->nullable(); // Gambar makanan
@@ -29,6 +29,6 @@ class CreateMenusTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('menus');
+        Schema::dropIfExists('bahan_makanans');
     }
 }
