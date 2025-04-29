@@ -2,80 +2,21 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col justify-between gap-2">
+        <div>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Bahan Makanan') }}
             </h2>
-            {{-- <div class="flex gap-3 w-full">
-                <form id="searchForm" method="GET" action="{{ route('admin.bahan_makanans.index') }}" class="relative w-full max-w-xl mb-4">
-                    <div class="flex items-center border border-blue-400 rounded-full px-3 py-1 shadow-sm focus-within:ring-2 focus-within:ring-blue-300">
-                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1116.65 2.5a7.5 7.5 0 010 15z" />
-                        </svg>
-                        <input
-                            type="search"
-                            name="search"
-                            placeholder="Search..."
-                            value="{{ request('search') }}"
-                            class="flex-1 px-2 py-1 bg-transparent outline-none"
-                            onkeydown="if(event.key === 'Enter'){ this.form.submit(); }"
-                        >
-                        @if(request('search'))
-                            <a href="{{ route('admin.bahan_makanans.index') }}" class="text-gray-500 hover:text-red-600">
-                                &times;
-                            </a>
-                        @endif
-                        <button type="button" onclick="toggleFilter()" class="ml-2 text-gray-500 hover:text-blue-600">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 5a1 1 0 012 0h10a1 1 0 110 2H5a1 1 0 01-2 0zm2 5a1 1 0 000 2h6a1 1 0 100-2H5zm-2 5a1 1 0 112 0h10a1 1 0 110 2H5a1 1 0 01-2 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                
-                    <!-- Filter Panel -->
-                    <div id="filterPanel" class="mt-3 p-4 border rounded-md bg-white shadow-md hidden">
-                        <!-- Kategori -->
-                        <label class="block mb-2 font-semibold text-gray-700">Kategori Bahan Masakan</label>
-                        <select name="kategori" class="w-full mb-4 rounded-md border-gray-300 shadow-sm">
-                            <option value="">Semua Kategori</option>
-                            @foreach ($kategoriOptions as $kategori)
-                                <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
-                                    {{ ucfirst($kategori) }}
-                                </option>
-                            @endforeach
-                        </select>
-                
-                        <!-- Updated At -->
-                        <label class="block mb-2 font-semibold text-gray-700">Tanggal Update</label>
-                        <div class="flex flex-col gap-1 text-sm text-gray-700">
-                            @php
-                                $dateOptions = [
-                                    '' => 'Any time',
-                                    '1' => 'Last day',
-                                    '7' => 'Last week',
-                                    '30' => 'Last month',
-                                    '365' => 'Last year',
-                                ];
-                            @endphp
-                            @foreach ($dateOptions as $key => $label)
-                                <label class="inline-flex items-center">
-                                    <input type="radio" name="updated" value="{{ $key }}" {{ request('updated') === $key ? 'checked' : '' }}>
-                                    <span class="ml-2">{{ $label }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                </form>
-            </div> --}}
+        </div>
+        <div class="flex gap-6 justify-center">
             <!-- Search & Filter UI -->
-            <div class="relative w-full flex items-center gap-2 mb-4">
+            <div class="relative w-full flex items-center gap-2">
                 <div class="flex items-center w-full border border-gray-300 rounded-full px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.41-1.41l5.38 5.38a1 1 0 01-1.42 1.42l-5.37-5.38zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd" />
                     </svg>
                     <form action="{{ route('admin.bahan_makanans.index') }}" method="GET" class="w-full flex">
                         <input type="text" name="search" placeholder="Search" value="{{ request('search') }}"
-                            class="w-full outline-none bg-transparent" />
+                            class="w-full outline-none bg-transparent border-none focus:outline-none focus:ring-0 py-0" />
                     </form>
                     @if(request('search'))
                         <a href="{{ route('admin.bahan_makanans.index') }}" class="ml-2 text-gray-500 hover:text-red-500">

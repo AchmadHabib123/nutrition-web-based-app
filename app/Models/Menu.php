@@ -5,24 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BahanMakanan extends Model
+class Menu extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'nama',
-        'gambar',
-        'protein',
-        'karbohidrat',
-        'total_lemak',
+        'deskripsi',
         'tipe_pasien',
-        'kategori_bahan_masakan',
-        'stok',
+        'gambar',
+        'total_protein',
+        'total_karbohidrat',
+        'total_lemak',
     ];
 
-    public function menus()
+    public function bahanMakanans()
     {
-        return $this->belongsToMany(Menu::class, 'bahan_menu')
+        return $this->belongsToMany(BahanMakanan::class, 'bahan_menu')
             ->withPivot('jumlah')
             ->withTimestamps();
     }
