@@ -36,8 +36,9 @@ class MenuController extends Controller
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
             'bahan_makanans' => 'required|array',
-            'bahan_makanans.*.id' => 'required|exists:bahan_makanans,id',
-            'bahan_makanans.*.jumlah' => 'required|numeric|min:1',
+            'bahan_makanans.*.id' => 'nullable|exists:bahan_makanans,id',
+            'bahan_makanans.*.jumlah' => 'nullable|numeric|min:1',
+
         ]);
     
         $data = $request->only(['nama', 'deskripsi', 'tipe_pasien']);
@@ -45,24 +46,31 @@ class MenuController extends Controller
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('images/menus', 'public');
         }
+        $pivotData = [];
         $totalProtein = 0;
         $totalKarbohidrat = 0;
         $totalLemak = 0;
 
         foreach ($request->bahan_makanans as $bahan) {
+            if (!isset($bahan['selected'])) continue;
+
             $bahanModel = BahanMakanan::find($bahan['id']);
             if ($bahanModel) {
-                $jumlah = $bahan['jumlah'];
+                $jumlah = $bahan['jumlah'] ?? 0;
                 $totalProtein += $bahanModel->protein * $jumlah;
                 $totalKarbohidrat += $bahanModel->karbohidrat * $jumlah;
                 $totalLemak += $bahanModel->total_lemak * $jumlah;
+
+                $pivotData[$bahan['id']] = ['jumlah' => $jumlah];
             }
         }
 
+
         // Tambahkan ke $data
-        $data['protein'] = $totalProtein;
-        $data['karbohidrat'] = $totalKarbohidrat;
+        $data['total_protein'] = $totalProtein;
+        $data['total_karbohidrat'] = $totalKarbohidrat;
         $data['total_lemak'] = $totalLemak;
+
 
     
         $menu = Menu::create($data);
@@ -70,11 +78,16 @@ class MenuController extends Controller
         // Hubungkan bahan makanan
         $pivotData = [];
         foreach ($request->bahan_makanans as $bahan) {
-            $pivotData[$bahan['id']] = ['jumlah' => $bahan['jumlah']];
+            // Lewati jika tidak dipilih
+            if (!isset($bahan['selected']) || empty($bahan['jumlah'])) continue;
+
+            $pivotData[$bahan['id']] = [
+                'jumlah' => $bahan['jumlah']
+            ];
         }
         $menu->bahanMakanans()->sync($pivotData);
     
-        return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil ditambahkan!');
+        return redirect()->route('admin.menus.create')->with('success', 'Menu berhasil ditambahkan!');
     }
 
     /**

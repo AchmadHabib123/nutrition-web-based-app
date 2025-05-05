@@ -40,9 +40,10 @@
                         <div class="space-y-2">
                             @foreach ($bahanMakanans as $bahan)
                                 <div class="flex items-center gap-4">
-                                    <input type="checkbox" name="bahan_makanans[{{ $bahan->id }}][id]" value="{{ $bahan->id }}">
+                                    <input type="checkbox" name="bahan_makanans[{{ $bahan->id }}][selected]" value="1">
                                     <span class="w-1/3">{{ $bahan->nama }}</span>
-                                    <input type="number" name="bahan_makanans[{{ $bahan->id }}][jumlah]" class="w-1/3 rounded border-gray-300" placeholder="Jumlah (gram)">
+                                    <input type="hidden" name="bahan_makanans[{{ $bahan->id }}][id]" value="{{ $bahan->id }}">
+                                    <input type="number" step="any" name="bahan_makanans[{{ $bahan->id }}][jumlah]" class="w-1/3 rounded border-gray-300" placeholder="Jumlah (gram)">
                                 </div>
                             @endforeach
                         </div>
