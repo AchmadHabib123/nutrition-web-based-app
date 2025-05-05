@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
 // Rute Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
+    Route::resource('menus', MenuController::class);
     Route::resource('bahan_makanans', BahanMakananController::class);
     Route::post('/bahan_makanans/import', [BahanMakananController::class, 'importCsv'])->name('bahan_makanans.import');
     // Route::get('/admin/bahan_makanans/create', [MenuController::class, 'create'])->name('admin.bahan_makanans.create');
