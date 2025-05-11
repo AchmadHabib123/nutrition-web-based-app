@@ -14,12 +14,12 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.41-1.41l5.38 5.38a1 1 0 01-1.42 1.42l-5.37-5.38zM14 8a6 6 0 11-12 0 6 6 0 0112 0z" clip-rule="evenodd" />
                     </svg>
-                    <form action="{{ route('admin.bahan_makanans.index') }}" method="GET" class="w-full flex">
+                    <form action="{{ route('admin.logistics.index') }}" method="GET" class="w-full flex">
                         <input type="text" name="search" placeholder="Search" value="{{ request('search') }}"
                             class="w-full outline-none bg-transparent border-none focus:outline-none focus:ring-0 py-0" />
                     </form>
                     @if(request('search'))
-                        <a href="{{ route('admin.bahan_makanans.index') }}" class="ml-2 text-gray-500 hover:text-red-500">
+                        <a href="{{ route('admin.logistics.index') }}" class="ml-2 text-gray-500 hover:text-red-500">
                             &#10005;
                         </a>
                     @endif
@@ -32,7 +32,7 @@
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 13.414V18a1 1 0 01-1.447.894l-4-2A1 1 0 018 16v-2.586L3.293 6.707A1 1 0 013 6V4z" />
                     </svg>
                 </button>
-                <button onclick="window.location='{{ route('admin.bahan_makanans.create') }}'" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <button onclick="window.location='{{ route('admin.logistics.bahan_makanans.create') }}'" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     Tambah
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
@@ -41,7 +41,7 @@
             </div>
             <!-- Floating Filter Panel -->
             <div id="filterPanel" class="absolute top-20 left-0 bg-white shadow-xl border rounded-lg p-5 w-full md:w-96 z-50 hidden">
-                <form id="filterForm" action="{{ route('admin.bahan_makanans.index') }}" method="GET">
+                <form id="filterForm" action="{{ route('admin.logistics.index') }}" method="GET">
                     <!-- Hidden input to maintain search value -->
                     <input type="hidden" name="search" value="{{ request('search') }}">
                     
@@ -93,7 +93,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 @foreach($bahanMakanans as $bahanMakanan)
                     <div class="bg-white shadow-sm rounded-lg overflow-hidden relative p-4">
-                        <a href="{{ route('admin.bahan_makanans.show', $bahanMakanan->id) }}" class="block">
+                        <a href="{{ route('admin.logistics.bahan_makanans.show', $bahanMakanan->id) }}" class="block">
                             <div class="flex gap-4">
                                 @if($bahanMakanan->gambar)
                                     @if (Str::startsWith($bahanMakanan->gambar, ['http://', 'https://']))
@@ -158,7 +158,7 @@
                         <div class="absolute top-6 right-6">
                             <button 
                                 class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center" 
-                                onclick="confirmEdit('{{ route('admin.bahan_makanans.edit', $bahanMakanan->id) }}')"
+                                onclick="confirmEdit('{{ route('admin.logistics.bahan_makanans.edit', $bahanMakanan->id) }}')"
                             >
                                 <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path d="M17.414 2.586a2 2 0 010 2.828l-2 2-2.828-2.828 2-2a2 2 0 012.828 0zm-3.828 3.828L5 15l-2.5.5.5-2.5L13.586 4l2.828 2.828z" />

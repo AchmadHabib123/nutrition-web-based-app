@@ -57,7 +57,7 @@
 
                 <!-- Tautan Kembali -->
                 <div class="mt-4">
-                    <a href="{{ route('admin.bahan_makanans.index') }}" class="text-indigo-600 hover:text-indigo-900">
+                    <a href="{{ route('admin.logistics.index') }}" class="text-indigo-600 hover:text-indigo-900">
                         &larr; Kembali ke Daftar Menu
                     </a>
                 </div>
@@ -75,7 +75,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm rounded-lg p-6">
-                <form id="editForm" action="{{ route('admin.bahan_makanans.update', $bahanMakanan) }}" method="POST" enctype="multipart/form-data">
+                <form id="editForm" action="{{ route('admin.logistics.bahan_makanans.update', $bahanMakanan) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="mb-4">

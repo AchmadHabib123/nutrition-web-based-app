@@ -10,10 +10,10 @@
             Dashboard
         </x-nav-link>
         
-        <x-nav-link href="{{ route('admin.bahan_makanans.index') }}" :active="request()->routeIs('admin.bahan_makanans.*')">
+        <x-nav-link href="{{ route('admin.logistics.index') }}" :active="request()->routeIs('admin.logistics.*')">
             Bahan Makanan
         </x-nav-link>
-        <x-nav-link href="{{ route('admin.bahan_makanans.index') }}" :active="request()->routeIs('admin.operasionals.*')">
+        <x-nav-link href="{{ route('admin.logistics.index') }}" :active="request()->routeIs('admin.operasionals.*')">
             Operasional
         </x-nav-link>
     </nav>

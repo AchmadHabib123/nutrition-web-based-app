@@ -25,4 +25,12 @@ class Menu extends Model
             ->withPivot('jumlah')
             ->withTimestamps();
     }
+
+    public function jadwalMakanans()
+    {
+        return $this->belongsToMany(JadwalMakanan::class, 'jadwal_makanan_menu')
+                    ->withPivot('tanggal', 'waktu_makan')
+                    ->withTimestamps();
+    }
+
 }
