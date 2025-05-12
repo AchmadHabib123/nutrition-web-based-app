@@ -28,8 +28,12 @@
                             <td class="border px-4 py-2">{{ $jadwal->tanggal_mulai }} - {{ $jadwal->tanggal_selesai }}</td>
                             <td class="border px-4 py-2">{{ $jadwal->tipe_pasien }}</td>
                             <td class="border px-4 py-2">{{ $jadwal->menus_count ?? '-' }}</td>
-                            <td class="border px-4 py-2">
+                            {{-- <td class="border px-4 py-2">
                                 <a href="{{ route('admin.jadwal-makanans.show', $jadwal->id) }}" class="text-blue-600 hover:underline">Lihat</a>
+                            </td> --}}
+                            <td class="border px-4 py-2 space-x-2">
+                                <a href="{{ route('admin.jadwal-makanans.show', $jadwal->id) }}" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">Lihat</a>
+                                <a href="{{ route('admin.jadwal-makanans.edit', $jadwal->id) }}" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm">Edit</a>
                             </td>
                         </tr>
                     @endforeach

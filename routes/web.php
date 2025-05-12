@@ -59,12 +59,28 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
         Route::post('bahan_makanans/import', [BahanMakananController::class, 'importCsv'])->name('bahan_makanans.import');
     });
-    Route::prefix('jadwal-makanans')->name('jadwal-makanans.')->group(function () {
-        Route::get('create', [JadwalMakananController::class, 'create'])->name('create');
-        Route::post('/', [JadwalMakananController::class, 'store'])->name('store');
-        Route::get('/', [JadwalMakananController::class, 'index'])->name('index');
-        Route::get('/{jadwal_makanan}', [JadwalMakananController::class, 'show'])->name('show');
+    // Route::prefix('jadwal-makanans')->name('jadwal-makanans.')->group(function () {
+    //     Route::get('create', [JadwalMakananController::class, 'create'])->name('create');
+    //     Route::post('/', [JadwalMakananController::class, 'store'])->name('store');
+    //     Route::get('/', [JadwalMakananController::class, 'index'])->name('index');
+    //     Route::get('/{jadwal_makanan}', [JadwalMakananController::class, 'show'])->name('show');
+    //     Route::get('{id}/edit', [JadwalMakananController::class, 'edit'])->name('edit');
+    //     Route::put('{id}', [JadwalMakananController::class, 'update'])->name('update');
 
+
+    // });
+    Route::prefix('jadwal-makanans')->name('jadwal-makanans.')->group(function () {
+        Route::resource('/', JadwalMakananController::class)->parameters([
+            '' => 'jadwal_makanan',
+        ])->names([
+            'index' => 'index',
+            'create' => 'create',
+            'store' => 'store',
+            'show' => 'show',
+            'edit' => 'edit',
+            'update' => 'update',
+            'destroy' => 'destroy',
+        ]);
     });
     
     // Route::resource('bahan_makanans', BahanMakananController::class);
