@@ -15,6 +15,8 @@ class CreatePatientsTable extends Migration
             $table->text('riwayat_penyakit');
             $table->integer('kalori_makanan')->default(0);
             $table->integer('kalori_harian')->default(0);
+            // $table->string('status_rawat')->default('aktif');
+            $table->enum('status_pasien', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();
         });
     }

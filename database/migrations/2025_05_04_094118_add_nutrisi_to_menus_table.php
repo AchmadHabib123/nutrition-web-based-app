@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('menus', function (Blueprint $table) {
-           $table->integer('protein')->default(0);
-           $table->integer('karbohidrat')->default(0);
-           $table->integer('total_lemak')->default(0); 
-        });
+        // Schema::table('menus', function (Blueprint $table) {
+        //    $table->integer('protein')->default(0);
+        //    $table->integer('karbohidrat')->default(0);
+        //    $table->integer('total_lemak')->default(0); 
+        // });
     }
 
     /**

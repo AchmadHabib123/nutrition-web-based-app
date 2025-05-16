@@ -27,6 +27,7 @@
                     <p><strong>Jenis Kelamin:</strong> {{ ucfirst($patient->jenis_kelamin) }}</p>
                     <p><strong>Kalori Makanan:</strong> {{ $patient->kalori_makanan }} kcal</p>
                     <p><strong>Kalori Harian:</strong> {{ $patient->kalori_harian }} kcal</p>
+                    <p><strong>Status Pasien:</strong> {{ $patient->status_pasien }} kcal</p>
                 </div>
 
                 <h3 class="text-lg font-medium text-gray-900 mt-6">Makanan yang Dikonsumsi</h3>

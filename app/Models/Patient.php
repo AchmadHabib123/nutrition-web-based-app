@@ -19,7 +19,9 @@ class Patient extends Model
         'tinggi_badan',
         'usia',
         'jenis_kelamin',
-        'tipe_pasien'
+        'tipe_pasien',
+        'status_pasien' => 'aktif',
+
     ];    
 
     // Jika ada relasi dengan makanan yang dikonsumsi

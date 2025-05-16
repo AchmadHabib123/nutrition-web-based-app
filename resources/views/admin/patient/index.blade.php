@@ -68,3 +68,5 @@
         </div>
     </div>
 </x-app-layout>
+{{-- Saat menampilkan Kalori Harian dikolom Kalori harian yang ada di dalam table "patients" dihitung dari penjumlahan kalori makanan sesuai jadwal makanans dan tipe pasiennya yang berlaku dihari tersebut
+admin/patient/index.blade.php --}}
