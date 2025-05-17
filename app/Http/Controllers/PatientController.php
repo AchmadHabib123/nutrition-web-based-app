@@ -149,8 +149,11 @@ class PatientController extends Controller
         // DEBUG: Cek apakah tanggal sudah dikonversi dengan benar
         \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
 
-        $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
-            ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+        // $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
+        //     ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+        //     ->get();
+        $patients = Patient::where('status_pasien', 'aktif')
+            ->whereDate('created_at', '<=', $carbonDate)
             ->get();
         // DEBUG: Cek apakah data ditemukan
         if ($patients->isEmpty()) {

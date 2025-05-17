@@ -10,97 +10,6 @@
     <div class="py-2 px-2">
         <div id="calendar"></div>
     </div>
-    <!-- Statistik Kalori & Menu Harian -->
-{{-- <div class="py-4 px-4">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Statistik Kalori -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Calories Intake</h3>
-            <div class="flex flex-col md:flex-row items-center justify-between">
-                <!-- Donut circle -->
-                <div class="relative w-48 h-48">
-                    <!-- Placeholder untuk donut chart -->
-                    <svg class="w-full h-full" viewBox="0 0 36 36">
-                        <path class="text-gray-200" d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" />
-                        <path class="text-orange-400" stroke-dasharray="70, 100"
-                            d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" />
-                        <text x="18" y="20.35" class="text-sm fill-current text-gray-700 text-center" text-anchor="middle">1240 kcal</text>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center text-sm text-gray-600">Calories left</div>
-                </div>
-
-                <!-- Detail Kalori -->
-                <div class="mt-6 md:mt-0 md:ml-6 space-y-3 w-full">
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-500">🍽️ Eaten calories</span>
-                        <span class="font-semibold text-gray-800">1750 kcal</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-gray-500">🔥 Burned calories</span>
-                        <span class="font-semibold text-gray-800">510 kcal</span>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Carbohydrates</span><span>37%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-2 rounded">
-                            <div class="bg-green-400 h-2 rounded w-[37%]"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Proteins</span><span>83%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-2 rounded">
-                            <div class="bg-green-400 h-2 rounded w-[83%]"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Fats</span><span>45%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 h-2 rounded">
-                            <div class="bg-green-400 h-2 rounded w-[45%]"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Menu Harian -->
-        <div class="bg-white rounded-lg shadow p-6 space-y-4">
-            <h3 class="text-lg font-semibold mb-4">Jadwal Makanan Hari Ini</h3>
-
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium">Breakfast</p>
-                    <p class="text-xs text-gray-500">05.00 am - 07.00 am</p>
-                </div>
-                <div class="text-right font-bold text-gray-700">380 kcal</div>
-            </div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium">Lunch</p>
-                    <p class="text-xs text-gray-500">12.30 pm - 01.00 pm</p>
-                </div>
-                <div class="text-right font-bold text-gray-700">420 kcal</div>
-            </div>
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium">Dinner</p>
-                    <p class="text-xs text-gray-500">06.00 pm - 08.00 pm</p>
-                </div>
-                <div class="text-right font-bold text-gray-700">220 kcal</div>
-            </div>
-        </div>
-    </div>
-</div> --}}
-
     <!-- Tabel Pasien -->
     <div class="py-1">
         <div class="max-w-7xl mx-auto sm:px-2 lg:px-4">
@@ -129,7 +38,6 @@
                                 <th class="py-2 px-4 border-b">Kalori Makanan</th>
                                 <th class="py-2 px-4 border-b">Kalori Harian</th>
                                 <th class="py-2 px-4 border-b">Tipe Pasien</th>
-                                <th class="py-2 px-4 border-b">Status Pasien</th>
                                 <th class="py-2 px-4 border-b">Detail</th>
                             </tr>
                         </thead>
@@ -233,7 +141,6 @@
                                     <td class="py-2 px-4 border-b">${patient.kalori_makanan} kcal</td>
                                     <td class="py-2 px-4 border-b">${patient.kalori_harian} kcal</td>
                                     <td class="py-2 px-4 border-b">${patient.tipe_pasien}</td>
-                                    <td class="py-2 px-4 border-b">${patient.status_pasien}</td>
                                     <td class="flex py-2 px-4 border-b">
                                         <a href="/admin/patients/${patient.id}" class="text-blue-500 hover:text-blue-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

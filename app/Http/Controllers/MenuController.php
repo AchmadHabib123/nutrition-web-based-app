@@ -13,8 +13,10 @@ class MenuController extends Controller
      */
     public function index()
     {
-        //
+        $menus = Menu::with('bahanMakanans')->latest()->get();
+        return view('admin.menus.index', compact('menus'));
     }
+
 
     /**
      * Show the form for creating a new resource.
