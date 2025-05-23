@@ -11,26 +11,26 @@ class Menu extends Model
 
     protected $fillable = [
         'nama',
-        'gambar',
-        'protein',
-        'karbohidrat',
-        'total_lemak',
+        'deskripsi',
         'tipe_pasien',
-        'kategori_bahan_masakan',
+        'gambar',
+        'total_protein',
+        'total_karbohidrat',
+        'total_lemak',
     ];
-    
 
-    // protected $fillable = [
-    //     'tipe',
-    //     'nama_makanan',
-    //     'kalori',
-    // ];
+    public function bahanMakanans()
+    {
+        return $this->belongsToMany(BahanMakanan::class, 'bahan_menu')
+            ->withPivot('jumlah')
+            ->withTimestamps();
+    }
 
-    /**
-     * Relasi ke FoodConsumption (Opsional).
-     */
-    // public function foodConsumptions()
-    // {
-    //     return $this->hasMany(FoodConsumption::class);
-    // }
+    public function jadwalMakanans()
+    {
+        return $this->belongsToMany(JadwalMakanan::class, 'jadwal_makanan_menu')
+                    ->withPivot('tanggal', 'waktu_makan')
+                    ->withTimestamps();
+    }
+
 }

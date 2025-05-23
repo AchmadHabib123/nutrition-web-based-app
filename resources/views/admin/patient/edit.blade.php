@@ -91,6 +91,16 @@
                         </select>
                         <x-input-error :messages="$errors->get('tipe_pasien')" class="mt-2" />
                     </div>
+                    <!-- Status Pasien -->
+                    <div class="mt-4">
+                        <x-input-label for="status_pasien" :value="__('Status Pasien')" />
+                        <select id="status_pasien" name="status_pasien" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                            <option value="aktif" {{ old('status_pasien', $patient->status_pasien) == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="nonaktif" {{ old('status_pasien', $patient->status_pasien) == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('status_pasien')" class="mt-2" />
+                    </div>
+
 
                     <!-- Submit Button -->
                     <div class="flex items-center justify-end mt-4">
@@ -99,85 +109,7 @@
                         </x-primary-button>
                     </div>
                 </form>
-
-                <!-- Tambah Makanan yang Dikonsumsi -->
-                {{-- <div class="mt-6">
-                    <h3 class="text-lg font-medium text-gray-900">Tambah Makanan yang Dikonsumsi</h3>
-                    <form method="POST" action="{{ route('admin.food-consumptions.store', $patient->id) }}" class="mt-4">
-                        @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Nama Makanan -->
-                            <div>
-                                <x-input-label for="nama_makanan" :value="__('Nama Makanan')" />
-                                <x-text-input id="nama_makanan" class="block mt-1 w-full" type="text" name="nama_makanan" required />
-                                <x-input-error :messages="$errors->get('nama_makanan')" class="mt-2" />
-                            </div>
-
-                            <!-- Kalori -->
-                            <div>
-                                <x-input-label for="kalori" :value="__('Kalori (kcal)')" />
-                                <x-text-input id="kalori" class="block mt-1 w-full" type="number" name="kalori" min="0" required />
-                                <x-input-error :messages="$errors->get('kalori')" class="mt-2" />
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="flex items-end">
-                                <x-primary-button>
-                                    {{ __('Tambah') }}
-                                </x-primary-button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Daftar Makanan yang Dikonsumsi -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-medium text-gray-900">Makanan yang Dikonsumsi</h3>
-                    <div class="mt-4 overflow-x-auto">
-                        <table class="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th class="py-2 px-4 border-b">Nama Makanan</th>
-                                    <th class="py-2 px-4 border-b">Kalori</th>
-                                    <th class="py-2 px-4 border-b">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($patient->foodConsumptions as $food)
-                                    <tr>
-                                        <td class="py-2 px-4 border-b">{{ $food->nama_makanan }}</td>
-                                        <td class="py-2 px-4 border-b">{{ $food->kalori }} kcal</td>
-                                        <td class="py-2 px-4 border-b flex space-x-2">
-                                            <!-- Edit Makanan -->
-                                            <a href="{{ route('admin.food-consumptions.edit', [$patient->id, $food->id]) }}" class="text-yellow-500 hover:text-yellow-700" title="Edit Makanan">
-                                                <!-- Icon Edit -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m6 0l-3-3m0 0l-3 3m3-3v12" />
-                                                </svg>
-                                            </a>
-
-                                            <!-- Delete Makanan -->
-                                            <form method="POST" action="{{ route('admin.food-consumptions.destroy', [$patient->id, $food->id]) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus makanan ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-500 hover:text-red-700" title="Hapus Makanan">
-                                                    <!-- Icon Delete -->
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center py-4">Tidak ada makanan yang dikonsumsi.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div> --}}
             </div>
         </div>
-    </x-app-layout>
+    </div>
+</x-app-layout>

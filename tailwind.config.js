@@ -12,6 +12,16 @@ export default {
         './resources/**/*.vue',
     ],
 
+    safelist: [
+        'bg-white',
+        'text-emerald-600',
+        'rounded-l-full',
+        'font-semibold',
+        'shadow',
+        'hover:text-emerald-600',
+        'hover:bg-gray-200',
+    ],
+
     theme: {
         extend: {
             fontFamily: {

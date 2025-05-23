@@ -2,261 +2,125 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
-use App\Models\Menu;
-use App\Models\Patient;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use League\Csv\Reader;
+use App\Models\BahanMakanan;
+use App\Models\Menu;
 
 class MenuController extends Controller
 {
     /**
-     * Konstruktor untuk menerapkan middleware.
-     */
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin']);
-    }
-
-    /**
-     * Menampilkan daftar menu.
+     * Display a listing of the resource.
      */
     public function index()
     {
-        // $menus = Menu::all()->groupBy('tipe');
-        $menus = Menu::all();
-        $menus = Menu::paginate(12);
+        $menus = Menu::with('bahanMakanans')->latest()->get();
         return view('admin.menus.index', compact('menus'));
     }
 
-    // public function show(Menu $menu)
-    // {
-    //     $menus = Menu::all();
-    //     return view('admin.menus.show', compact('menus'));
-    // }
 
-    public function show(Menu $menu)
-{
-    return view('admin.menus.show', compact('menu')); // Kirim satu menu saja
-}
     /**
-     * Menampilkan form untuk menambahkan menu baru.
+     * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('admin.menus.create');
+        $bahanMakanans = BahanMakanan::all();
+        return view('admin.menus.create', compact('bahanMakanans'));
     }
 
     /**
-     * Menyimpan menu baru ke database.
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // Validasi data
-        // $request->validate([
-        //     'tipe' => 'required|in:VVIP,VIP,Normal',
-        //     'nama_makanan' => 'required|string|max:255',
-        //     'kalori' => 'required|integer|min:0',
-        // ]);
-
-        // // Cek duplikasi
-        // $exists = Menu::where('tipe', $request->tipe)
-        //               ->where('nama_makanan', $request->nama_makanan)
-        //               ->exists();
-
-        // if ($exists) {
-        //     return redirect()->back()->withErrors(['nama_makanan' => 'Makanan ini sudah ada untuk tipe pasien yang dipilih.'])->withInput();
-        // }
-
-        // // Simpan menu
-        // $menu = Menu::create([
-        //     'tipe' => $request->tipe,
-        //     'nama_makanan' => $request->nama_makanan,
-        //     'kalori' => $request->kalori,
-        // ]);
-
-        // // Perbarui kalori_makanan untuk semua pasien dengan tipe yang sama
-        // Patient::where('tipe_pasien', $request->tipe)->update([
-        //     'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
-        // ]);
-
-        // return redirect()->route('admin.menus.index')->with('success', 'Menu baru berhasil ditambahkan dan kalori pasien diperbarui.');
-        $validated = $request->validate([
+        $request->validate([
             'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'protein' => 'required|integer|min:0',
-            'karbohidrat' => 'required|integer|min:0',
-            'total_lemak' => 'required|integer|min:0',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
-            'kategori_bahan_masakan' => 'required|in:makanan_pokok,lauk,sayur,buah,susu',
-        ]);
+            'bahan_makanans' => 'required|array',
+            'bahan_makanans.*.id' => 'nullable|exists:bahan_makanans,id',
+            'bahan_makanans.*.jumlah' => 'nullable|numeric|min:1',
 
+        ]);
+    
+        $data = $request->only(['nama', 'deskripsi', 'tipe_pasien']);
+    
         if ($request->hasFile('gambar')) {
-            $validated['gambar'] = $request->file('gambar')->store('images/menus', 'public');
+            $data['gambar'] = $request->file('gambar')->store('images/menus', 'public');
+        }
+        $pivotData = [];
+        $totalProtein = 0;
+        $totalKarbohidrat = 0;
+        $totalLemak = 0;
+
+        foreach ($request->bahan_makanans as $bahan) {
+            if (!isset($bahan['selected'])) continue;
+
+            $bahanModel = BahanMakanan::find($bahan['id']);
+            if ($bahanModel) {
+                $jumlah = $bahan['jumlah'] ?? 0;
+                $totalProtein += $bahanModel->protein * $jumlah;
+                $totalKarbohidrat += $bahanModel->karbohidrat * $jumlah;
+                $totalLemak += $bahanModel->total_lemak * $jumlah;
+
+                $pivotData[$bahan['id']] = ['jumlah' => $jumlah];
+            }
         }
 
-        Menu::create($validated);
 
-        return redirect()->route('admin.menus.index')->with('success', 'Menu makanan berhasil ditambahkan!');
+        // Tambahkan ke $data
+        $data['total_protein'] = $totalProtein;
+        $data['total_karbohidrat'] = $totalKarbohidrat;
+        $data['total_lemak'] = $totalLemak;
+
+
+    
+        $menu = Menu::create($data);
+    
+        // Hubungkan bahan makanan
+        $pivotData = [];
+        foreach ($request->bahan_makanans as $bahan) {
+            // Lewati jika tidak dipilih
+            if (!isset($bahan['selected']) || empty($bahan['jumlah'])) continue;
+
+            $pivotData[$bahan['id']] = [
+                'jumlah' => $bahan['jumlah']
+            ];
+        }
+        $menu->bahanMakanans()->sync($pivotData);
+    
+        return redirect()->route('admin.menus.create')->with('success', 'Menu berhasil ditambahkan!');
     }
-
-
 
     /**
-     * Menampilkan form untuk mengedit menu.
+     * Display the specified resource.
      */
-//     public function edit(Menu $menu)
-//     {
-    //         $tipe_options = ['VVIP', 'VIP', 'Normal'];
-    //         return view('admin.menus.edit', compact('menu', 'tipe_options'));
-    //     }
-
-    //     /**
-    //      * Memperbarui menu.
-    //      */
-    //     public function update(Request $request, Menu $menu)
-    // {
-    //     // Validasi data
-    //     $request->validate([
-    //         'tipe' => 'required|in:VVIP,VIP,Normal',
-    //         'nama_makanan' => 'required|string|max:255',
-    //         'kalori' => 'required|integer|min:0',
-    //     ]);
-
-    //     // Cek duplikasi
-    //     $exists = Menu::where('tipe', $request->tipe)
-    //                   ->where('nama_makanan', $request->nama_makanan)
-    //                   ->where('id', '!=', $menu->id)
-    //                   ->exists();
-
-    //     if ($exists) {
-    //         return redirect()->back()->withErrors(['nama_makanan' => 'Makanan ini sudah ada untuk tipe pasien yang dipilih.'])->withInput();
-    //     }
-
-    //     // Update menu
-    //     $menu->update([
-    //         'tipe' => $request->tipe,
-    //         'nama_makanan' => $request->nama_makanan,
-    //         'kalori' => $request->kalori,
-    //     ]);
-
-    //     // Perbarui kalori_makanan untuk semua pasien dengan tipe yang sama
-    //     Patient::where('tipe_pasien', $request->tipe)->update([
-    //         'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
-    //     ]);
-
-    //     return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil diperbarui dan kalori pasien diperbarui.');
-    // }
-
-
-//     /**
-//      * Menghapus menu.
-//      */
-//     public function destroy(Menu $menu)
-// {
-//     $tipe = $menu->tipe;
-//     $menu->delete();
-
-//     // Perbarui kalori_makanan untuk semua pasien dengan tipe yang sama
-//     Patient::where('tipe_pasien', $tipe)->update([
-//         'kalori_makanan' => Menu::where('tipe', $tipe)->sum('kalori'),
-//     ]);
-
-//     return redirect()->route('admin.menus.index')->with('success', 'Menu berhasil dihapus dan kalori pasien diperbarui.');
-// }
-    public function edit(Menu $menu)
+    public function show(string $id)
     {
-        return view('admin.menus.edit', compact('menu'));
+        //
     }
 
-    public function update(Request $request, Menu $menu)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'protein' => 'required|integer|min:0',
-            'karbohidrat' => 'required|integer|min:0',
-            'total_lemak' => 'required|integer|min:0',
-            'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
-            'kategori_bahan_masakan' => 'required|in:makanan_pokok,lauk,sayur,buah,susu',
-        ]);
-
-        if ($request->hasFile('gambar')) {
-            // Hapus gambar lama
-            if ($menu->gambar) {
-                Storage::disk('public')->delete($menu->gambar);
-            }
-            $validated['gambar'] = $request->file('gambar')->store('images/menus', 'public');
-        }
-
-        $menu->update($validated);
-
-        return redirect()->route('admin.menus.index')->with('success', 'Menu makanan berhasil diperbarui!');
+        //
     }
 
-    // public function importCsv(Request $request)
-    // {
-    //     $request->validate([
-    //         'csv_file' => 'required|file|mimes:csv,txt|max:2048',
-    //     ]);
-
-    //     $file = $request->file('csv_file');
-    //     $path = $file->getRealPath();
-        
-    //     $csv = Reader::createFromPath($path, 'r');
-    //     $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
-        
-    //     $records = $csv->getRecords();
-
-    //     foreach ($records as $record) {
-    //         Menu::create([
-    //             'nama' => $record['name'],
-    //             'protein' => (int) $record['proteins'],
-    //             'karbohidrat' => (int) $record['carbohydrate'],
-    //             'total_lemak' => (int) $record['fat'],
-    //             'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
-    //             'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
-    //             'gambar' => $record['image'], // Pastikan URL gambar dapat diakses atau upload ke storage
-    //         ]);
-    //     }
-
-    //     return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
-    // }
-    public function importCsv(Request $request)
-{
-    $request->validate([
-        'csv_file' => 'required|file|mimes:csv,txt|max:2048',
-    ]);
-
-    $file = $request->file('csv_file');
-    $path = $file->getRealPath();
-    
-    $csv = Reader::createFromPath($path, 'r');
-    $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
-    
-    $records = $csv->getRecords();
-
-    foreach ($records as $record) {
-        // Pastikan nilai gambar tidak lebih dari 255 karakter
-        $imageUrl = $record['image'] ?? null; // Pastikan kolom ada dan tidak null
-        if ($imageUrl && strlen($imageUrl) > 255) {
-            $imageUrl = null; // Bisa juga diisi dengan gambar default jika diinginkan
-        }
-
-        Menu::create([
-            'nama' => $record['name'],
-            'protein' => (int) $record['proteins'],
-            'karbohidrat' => (int) $record['carbohydrate'],
-            'total_lemak' => (int) $record['fat'],
-            'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
-            'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
-            'gambar' => $imageUrl, // Simpan URL jika valid
-        ]);
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
     }
 
-    return redirect()->route('admin.menus.index')->with('success', 'Data dari CSV berhasil diimpor!');
-}
-
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
 }

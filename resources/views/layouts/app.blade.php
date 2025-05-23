@@ -16,7 +16,7 @@
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
-    <body class="font-sans antialiased">
+    {{-- <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
@@ -34,5 +34,27 @@
                 {{ $slot }}
             </main>
         </div>
-    </body>
+    </body> --}}
+    <body class="font-sans antialiased">
+        <div class="flex min-h-screen bg-gray-100">
+            <!-- Sidebar -->
+            @include('layouts.sidebar')
+    
+            <!-- Main area -->
+            <div class="flex flex-col flex-1 overflow-hidden">
+                <!-- Header -->
+                <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                    <!-- Judul Halaman -->
+                        {{ $header ?? 'Dashboard' }}
+                    <!-- Profile Menu -->
+                    @include('profile.profile-menu')
+                </header>
+    
+                <!-- Main Content -->
+                <main class="flex-1 overflow-y-auto p-6">
+                    {{ $slot }}
+                </main>
+            </div>
+        </div>
+    </body>    
 </html>

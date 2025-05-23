@@ -17,10 +17,20 @@ class PatientController extends Controller
     /**
      * Menampilkan daftar pasien.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $patients = Patient::all();
-        return view('admin.patient.index', compact('patients'));
+        // $patients = Patient::where('status_pasien', 'aktif')->get();
+        // return view('admin.patient.index', compact('patients'));
+        $selectedDate = $request->input('tanggal') 
+        ? Carbon::parse($request->input('tanggal')) 
+        : Carbon::today();
+
+        // Filter pasien aktif yang dibuat sebelum atau pada tanggal yang dipilih
+        $patients = Patient::where('status_pasien', 'aktif')
+            ->whereDate('created_at', '<=', $selectedDate)
+            ->get();
+
+        return view('admin.patients.index', compact('patients', 'selectedDate'));
     }
 
     /**
@@ -47,6 +57,7 @@ class PatientController extends Controller
             'usia' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:pria,wanita',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal', // Tambahkan validasi tipe_pasien
+            'status_pasien' => 'aktif',
         ]);
 
         // Hitung kalori harian berdasarkan BMR dan riwayat penyakit
@@ -99,6 +110,7 @@ class PatientController extends Controller
             'usia' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:pria,wanita',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal', // Tambahkan validasi tipe_pasien
+            'status_pasien' => 'required|in:aktif,nonaktif',
         ]);
 
         // Hitung kalori harian berdasarkan BMR dan riwayat penyakit
@@ -117,6 +129,8 @@ class PatientController extends Controller
             'jenis_kelamin' => $request->jenis_kelamin,
             'tipe_pasien' => $request->tipe_pasien,
             'kalori_harian' => $kalori_harian,
+            'status_pasien' => $request->status_pasien,
+
         ]);
 
         return redirect()->route('admin.patients.index')->with('success', 'Data pasien berhasil diperbarui.');
@@ -135,8 +149,11 @@ class PatientController extends Controller
         // DEBUG: Cek apakah tanggal sudah dikonversi dengan benar
         \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
 
-        $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
-            ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+        // $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
+        //     ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+        //     ->get();
+        $patients = Patient::where('status_pasien', 'aktif')
+            ->whereDate('created_at', '<=', $carbonDate)
             ->get();
         // DEBUG: Cek apakah data ditemukan
         if ($patients->isEmpty()) {
