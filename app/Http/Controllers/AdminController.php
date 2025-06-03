@@ -13,6 +13,6 @@ class AdminController extends Controller
     $patients = Patient::all();
 
     // Kirim data pasien ke view dashboard
-    return view('admin.dashboard', compact('patients'));
+    return view('ahli-gizi.dashboard', compact('patients'));
 }
 }

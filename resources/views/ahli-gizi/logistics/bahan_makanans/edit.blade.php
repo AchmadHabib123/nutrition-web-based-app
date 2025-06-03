@@ -1,4 +1,4 @@
-<!-- resources/views/admin/bahan_makanans/edit.blade.php -->
+<!-- resources/views/ahli-gizi/bahan_makanans/edit.blade.php -->
 
 {{-- <x-app-layout>
     <x-slot name="header">
@@ -17,7 +17,7 @@
             @endif
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('admin.bahan_makanans.update', $bahanMakanan->id) }}">
+                <form method="POST" action="{{ route('ahli-gizi.bahan_makanans.update', $bahanMakanan->id) }}">
                     @csrf
                     @method('PUT')
 
@@ -57,7 +57,7 @@
 
                 <!-- Tautan Kembali -->
                 <div class="mt-4">
-                    <a href="{{ route('admin.logistics.index') }}" class="text-indigo-600 hover:text-indigo-900">
+                    <a href="{{ route('ahli-gizi.logistics.index') }}" class="text-indigo-600 hover:text-indigo-900">
                         &larr; Kembali ke Daftar Menu
                     </a>
                 </div>
@@ -75,7 +75,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm rounded-lg p-6">
-                <form id="editForm" action="{{ route('admin.logistics.bahan_makanans.update', $bahanMakanan) }}" method="POST" enctype="multipart/form-data">
+                <form id="editForm" action="{{ route('ahli-gizi.logistics.bahan_makanans.update', $bahanMakanan) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="mb-4">

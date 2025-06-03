@@ -1,4 +1,4 @@
-<!-- resources/views/admin/patients/create.blade.php -->
+<!-- resources/views/ahli-gizi/patients/create.blade.php -->
 
 <x-app-layout>
     <x-slot name="header">
@@ -17,7 +17,7 @@
             @endif
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('admin.patients.store') }}">
+                <form method="POST" action="{{ route('ahli-gizi.patients.store') }}">
                     @csrf
 
                     <!-- No Kamar -->
@@ -133,7 +133,7 @@
                 <!-- Tambahkan di bawah form submit button -->
 
                 <div class="mt-4">
-                    <a href="{{ route('admin.patients.index') }}" class="text-indigo-600 hover:text-indigo-900">
+                    <a href="{{ route('ahli-gizi.patients.index') }}" class="text-indigo-600 hover:text-indigo-900">
                         &larr; Kembali ke Daftar Pasien
                     </a>
                 </div>

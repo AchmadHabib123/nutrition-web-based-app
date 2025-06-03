@@ -14,7 +14,7 @@ class MenuController extends Controller
     public function index()
     {
         $menus = Menu::with('bahanMakanans')->latest()->get();
-        return view('admin.menus.index', compact('menus'));
+        return view('ahli-gizi.menus.index', compact('menus'));
     }
 
 
@@ -24,7 +24,7 @@ class MenuController extends Controller
     public function create()
     {
         $bahanMakanans = BahanMakanan::all();
-        return view('admin.menus.create', compact('bahanMakanans'));
+        return view('ahli-gizi.menus.create', compact('bahanMakanans'));
     }
 
     /**
@@ -89,7 +89,7 @@ class MenuController extends Controller
         }
         $menu->bahanMakanans()->sync($pivotData);
     
-        return redirect()->route('admin.menus.create')->with('success', 'Menu berhasil ditambahkan!');
+        return redirect()->route('ahli-gizi.menus.create')->with('success', 'Menu berhasil ditambahkan!');
     }
 
     /**

@@ -8,23 +8,23 @@ class LoginTest extends TestCase
 {
     public function test_admin_redirects_to_admin_dashboard()
     {
-        $admin = User::factory()->make(['role' => 'admin']);
+        $admin = User::factory()->make(['role' => 'ahli-gizi']);
 
         $this->actingAs($admin);
 
         $response = $this->get('/dashboard');
 
-        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertRedirect(route('ahli-gizi.dashboard'));
     }
 
     public function test_user_redirects_to_user_dashboard()
     {
-        $user = User::factory()->make(['role' => 'user']);
+        $user = User::factory()->make(['role' => 'tenaga-gizi']);
 
         $this->actingAs($user);
 
         $response = $this->get('/dashboard');
 
-        $response->assertRedirect(route('user.dashboard'));
+        $response->assertRedirect(route('tenaga-gizi.dashboard'));
     }
 }

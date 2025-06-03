@@ -28,7 +28,7 @@
                 @endforeach
             </div>
 
-            <a href="{{ route('admin.jadwal-makanans.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Kembali ke Daftar</a>
+            <a href="{{ route('ahli-gizi.jadwal-makanans.index') }}" class="inline-block mt-4 text-blue-600 hover:underline">← Kembali ke Daftar</a>
         </div>
     </div>
 </x-app-layout>

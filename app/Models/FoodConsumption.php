@@ -13,12 +13,14 @@ class FoodConsumption extends Model
         'patient_id',
         'nama_makanan',
         'kalori',
+        'waktu_makan',
+        'status'
     ];
 
     /**
      * Relasi ke Patient.
      */
-    public function patient()
+    public function patients()
     {
         return $this->belongsTo(Patient::class);
     }

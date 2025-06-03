@@ -20,7 +20,7 @@ class Patient extends Model
         'usia',
         'jenis_kelamin',
         'tipe_pasien',
-        'status_pasien' => 'aktif',
+        'status_pasien',
 
     ];    
 

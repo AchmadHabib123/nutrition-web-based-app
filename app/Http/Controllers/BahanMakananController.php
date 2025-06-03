@@ -19,7 +19,7 @@ class BahanMakananController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'role:admin']);
+        $this->middleware(['auth', 'role:ahli-gizi']);
     }
 
     /**
@@ -30,7 +30,7 @@ class BahanMakananController extends Controller
     //     // $bahanMakanans = Menu::all()->groupBy('tipe');
     //     $bahanMakanans = Menu::all();
     //     $bahanMakanans = Menu::paginate(12);
-    //     return view('admin.logistics.index', compact('bahan_makanans'));
+    //     return view('ahli-gizi.logistics.index', compact('bahan_makanans'));
     // }
     // public function index(Request $request)
     // {
@@ -54,7 +54,7 @@ class BahanMakananController extends Controller
     //     // Ambil hasil akhir dengan paginasi
     //     $bahanMakanans = $query->paginate(12);
 
-    //     return view('admin.logistics.index', compact('bahan_makanans', 'kategoriOptions'));
+    //     return view('ahli-gizi.logistics.index', compact('bahan_makanans', 'kategoriOptions'));
     // }
     public function index(Request $request)
     {
@@ -95,24 +95,24 @@ class BahanMakananController extends Controller
 
         $kategoriOptions = BahanMakanan::select('kategori_bahan_masakan')->distinct()->pluck('kategori_bahan_masakan');
 
-        return view('admin.logistics.index', compact('bahanMakanans', 'kategoriOptions'));
+        return view('ahli-gizi.logistics.index', compact('bahanMakanans', 'kategoriOptions'));
     }
     // public function show(Menu $bahanMakanan)
     // {
     //     $bahanMakanans = Menu::all();
-    //     return view('admin.bahan_makanans.show', compact('bahan_makanans'));
+    //     return view('ahli-gizi.bahan_makanans.show', compact('bahan_makanans'));
     // }
 
     public function show(BahanMakanan $bahanMakanan)
 {
-    return view('admin.logistics.bahan_makanans.show', compact('bahanMakanan')); // Kirim satu menu saja
+    return view('ahli-gizi.logistics.bahan_makanans.show', compact('bahanMakanan')); // Kirim satu menu saja
 }
     /**
      * Menampilkan form untuk menambahkan menu baru.
      */
     public function create()
     {
-        return view('admin.logistics.bahan_makanans.create');
+        return view('ahli-gizi.logistics.bahan_makanans.create');
     }
 
     /**
@@ -148,7 +148,7 @@ class BahanMakananController extends Controller
         //     'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
         // ]);
 
-        // return redirect()->route('admin.logistics.index')->with('success', 'Menu baru berhasil ditambahkan dan kalori pasien diperbarui.');
+        // return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu baru berhasil ditambahkan dan kalori pasien diperbarui.');
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -166,7 +166,7 @@ class BahanMakananController extends Controller
 
         BahanMakanan::create($validated);
 
-        return redirect()->route('admin.logistics.index')->with('success', 'Menu makanan berhasil ditambahkan!');
+        return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu makanan berhasil ditambahkan!');
     }
 
 
@@ -177,7 +177,7 @@ class BahanMakananController extends Controller
 //     public function edit(Menu $bahanMakanan)
 //     {
     //         $tipe_options = ['VVIP', 'VIP', 'Normal'];
-    //         return view('admin.bahan_makanans.edit', compact('menu', 'tipe_options'));
+    //         return view('ahli-gizi.bahan_makanans.edit', compact('menu', 'tipe_options'));
     //     }
 
     //     /**
@@ -214,7 +214,7 @@ class BahanMakananController extends Controller
     //         'kalori_makanan' => Menu::where('tipe', $request->tipe)->sum('kalori'),
     //     ]);
 
-    //     return redirect()->route('admin.logistics.index')->with('success', 'Menu berhasil diperbarui dan kalori pasien diperbarui.');
+    //     return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu berhasil diperbarui dan kalori pasien diperbarui.');
     // }
 
 
@@ -231,11 +231,11 @@ class BahanMakananController extends Controller
 //         'kalori_makanan' => Menu::where('tipe', $tipe)->sum('kalori'),
 //     ]);
 
-//     return redirect()->route('admin.logistics.index')->with('success', 'Menu berhasil dihapus dan kalori pasien diperbarui.');
+//     return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu berhasil dihapus dan kalori pasien diperbarui.');
 // }
     public function edit(BahanMakanan $bahanMakanan)
     {
-        return view('admin.logistics.bahan_makanans.edit', compact('bahanMakanan'));
+        return view('ahli-gizi.logistics.bahan_makanans.edit', compact('bahanMakanan'));
     }
 
     public function update(Request $request, BahanMakanan $bahanMakanan)
@@ -261,7 +261,7 @@ class BahanMakananController extends Controller
 
         $bahanMakanan->update($validated);
 
-        return redirect()->route('admin.logistics.index')->with('success', 'Menu makanan berhasil diperbarui!');
+        return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu makanan berhasil diperbarui!');
     }
 
     // public function importCsv(Request $request)
@@ -290,7 +290,7 @@ class BahanMakananController extends Controller
     //         ]);
     //     }
 
-    //     return redirect()->route('admin.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
+    //     return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
     // }
     public function importCsv(Request $request)
 {
@@ -324,7 +324,7 @@ class BahanMakananController extends Controller
         ]);
     }
 
-    return redirect()->route('admin.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
+    return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
 }
 
 }

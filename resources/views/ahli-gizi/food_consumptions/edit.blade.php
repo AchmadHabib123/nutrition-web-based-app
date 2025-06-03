@@ -1,4 +1,4 @@
-<!-- resources/views/admin/food_consumptions/edit.blade.php -->
+<!-- resources/views/ahli-gizi/food_consumptions/edit.blade.php -->
 
 <x-app-layout>
     <x-slot name="header">
@@ -18,7 +18,7 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <!-- Form Edit Makanan -->
-                <form method="POST" action="{{ route('admin.food-consumptions.update', [$patient->id, $food->id]) }}">
+                <form method="POST" action="{{ route('ahli-gizi.food-consumptions.update', [$patients->id, $food->id]) }}">
                     @csrf
                     @method('PUT')
 
@@ -46,7 +46,7 @@
 
                 <!-- Tautan Kembali -->
                 <div class="mt-4">
-                    <a href="{{ route('admin.patients.edit', $patient->id) }}" class="text-indigo-600 hover:text-indigo-900">
+                    <a href="{{ route('ahli-gizi.patients.edit', $patients->id) }}" class="text-indigo-600 hover:text-indigo-900">
                         &larr; Kembali ke Edit Pasien
                     </a>
                 </div>

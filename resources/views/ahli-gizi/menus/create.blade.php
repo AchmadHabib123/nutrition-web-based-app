@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow-sm rounded-lg">
-                <form action="{{ route('admin.menus.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('ahli-gizi.menus.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="mb-4">

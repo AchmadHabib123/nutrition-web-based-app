@@ -7,7 +7,7 @@
 
     <div class="py-6">
         <div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
-            <form action="{{ route('admin.jadwal-makanans.store') }}" method="POST">
+            <form action="{{ route('ahli-gizi.jadwal-makanans.store') }}" method="POST">
                 @csrf
 
                 <div class="mb-4">

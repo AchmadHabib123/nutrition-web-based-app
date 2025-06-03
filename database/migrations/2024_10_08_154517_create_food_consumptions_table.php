@@ -13,6 +13,7 @@ class CreateFoodConsumptionsTable extends Migration
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->string('nama_makanan');
             $table->integer('kalori');
+            $table->string('status')->default('planned');
             $table->timestamps();
         });
     }

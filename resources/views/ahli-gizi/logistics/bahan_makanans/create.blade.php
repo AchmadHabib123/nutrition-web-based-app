@@ -4,7 +4,7 @@
             {{ __('Tambah Menu Makanan') }}
         </h2>
     </x-slot>
-    <form action="{{ route('admin.logistics.bahan_makanans.import') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('ahli-gizi.logistics.bahan_makanans.import') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="file" name="csv_file" accept=".csv" required>
         <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md mt-2">Impor CSV</button>
@@ -13,7 +13,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm rounded-lg p-6">
-                <form action="{{ route('admin.logistics.bahan_makanans.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('ahli-gizi.logistics.bahan_makanans.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-4">
                         <label for="nama" class="block text-gray-700">Nama Makanan</label>

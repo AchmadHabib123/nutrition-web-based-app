@@ -12,17 +12,17 @@ class LoginTest extends TestCase
     public function test_admin_can_login_and_redirect_to_admin_dashboard()
     {
         $admin = User::factory()->create([
-            'email' => 'admin@example.com',
+            'email' => 'ahli-gizi@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'admin'
+            'role' => 'ahli-gizi'
         ]);
 
         $response = $this->post(route('login'), [
-            'email' => 'admin@example.com',
+            'email' => 'ahli-gizi@example.com',
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertRedirect(route('ahli-gizi.dashboard'));
         $this->assertAuthenticatedAs($admin);
     }
 
@@ -31,7 +31,7 @@ class LoginTest extends TestCase
         $user = User::factory()->create([
             'email' => 'user@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'user'
+            'role' => 'tenaga-gizi'
         ]);
 
         $response = $this->post(route('login'), [
@@ -39,7 +39,7 @@ class LoginTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect(route('user.dashboard'));
+        $response->assertRedirect(route('tenaga-gizi.dashboard'));
         $this->assertAuthenticatedAs($user);
     }
 

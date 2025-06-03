@@ -1,4 +1,4 @@
-<!-- resources/views/admin/patients/index.blade.php -->
+<!-- resources/views/ahli-gizi/patients/index.blade.php -->
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -29,17 +29,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($patients as $patient)
+                            @forelse($patients as $patients)
                                 <tr>
-                                    <td class="py-2 px-4 border-b">{{ $patient->no_kamar }}</td>
-                                    <td class="py-2 px-4 border-b">{{ $patient->nama_pasien }}</td>
-                                    <td class="py-2 px-4 border-b">{{ $patient->riwayat_penyakit }}</td>
-                                    <td class="py-2 px-4 border-b">{{ $patient->kalori_makanan }} kcal</td>
-                                    <td class="py-2 px-4 border-b">{{ $patient->kalori_harian }} kcal</td>
-                                    <td class="py-2 px-4 border-b">{{ $patient->tipe_pasien }}</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->no_kamar }}</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->nama_pasien }}</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->riwayat_penyakit }}</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->kalori_makanan }} kcal</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->kalori_harian }} kcal</td>
+                                    <td class="py-2 px-4 border-b">{{ $patients->tipe_pasien }}</td>
                                     <td class="py-2 px-4 border-b flex space-x-2">
                                         <!-- Rincian -->
-                                        <a href="{{ route('admin.patients.show', $patient->id) }}" class="text-blue-500 hover:text-blue-700">
+                                        <a href="{{ route('ahli-gizi.patients.show', $patients->id) }}" class="text-blue-500 hover:text-blue-700">
                                             <!-- Icon Rincian -->
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -48,7 +48,7 @@
                                         </a>
 
                                         <!-- Edit -->
-                                        <a href="{{ route('admin.patients.edit', $patient->id) }}" class="text-green-500 hover:text-green-700">
+                                        <a href="{{ route('ahli-gizi.patients.edit', $patients->id) }}" class="text-green-500 hover:text-green-700">
                                             <!-- Icon Edit -->
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-1.414L19 7m-5 5l5 5M16.5 7.5l-5-5" />

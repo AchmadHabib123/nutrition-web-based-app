@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white p-6 shadow-sm rounded-lg">
-                <a href="{{ route('admin.menus.create') }}" class="mb-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
+                <a href="{{ route('ahli-gizi.menus.create') }}" class="mb-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
                     + Tambah Menu
                 </a>
 

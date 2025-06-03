@@ -6,14 +6,14 @@
         </a>
     </div>
     <nav class="flex flex-col gap-3 space-y-1">
-        <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
+        <x-nav-link href="{{ route('ahli-gizi.dashboard') }}" :active="request()->routeIs('ahli-gizi.dashboard')">
             Dashboard
         </x-nav-link>
         
-        <x-nav-link href="{{ route('admin.logistics.index') }}" :active="request()->routeIs('admin.logistics.*')">
+        <x-nav-link href="{{ route('ahli-gizi.logistics.index') }}" :active="request()->routeIs('ahli-gizi.logistics.*')">
             Bahan Makanan
         </x-nav-link>
-        <x-nav-link href="{{ route('admin.logistics.index') }}" :active="request()->routeIs('admin.operasionals.*')">
+        <x-nav-link href="{{ route('ahli-gizi.logistics.index') }}" :active="request()->routeIs('ahli-gizi.operasionals.*')">
             Operasional
         </x-nav-link>
     </nav>

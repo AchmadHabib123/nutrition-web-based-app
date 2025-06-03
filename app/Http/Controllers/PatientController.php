@@ -11,7 +11,7 @@ class PatientController extends Controller
     // Konstruktor untuk menerapkan middleware
     public function __construct()
     {
-        $this->middleware(['auth', 'role:admin']);
+        $this->middleware(['auth', 'role:ahli-gizi']);
     }
 
     /**
@@ -20,7 +20,7 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         // $patients = Patient::where('status_pasien', 'aktif')->get();
-        // return view('admin.patient.index', compact('patients'));
+        // return view('ahli-gizi.patient.index', compact('patients'));
         $selectedDate = $request->input('tanggal') 
         ? Carbon::parse($request->input('tanggal')) 
         : Carbon::today();
@@ -30,7 +30,7 @@ class PatientController extends Controller
             ->whereDate('created_at', '<=', $selectedDate)
             ->get();
 
-        return view('admin.patients.index', compact('patients', 'selectedDate'));
+        return view('ahli-gizi.patients.index', compact('patients', 'selectedDate'));
     }
 
     /**
@@ -38,7 +38,7 @@ class PatientController extends Controller
      */
     public function create()
     {
-        return view('admin.patient.create');
+        return view('ahli-gizi.patients.create');
     }
 
     /**
@@ -79,29 +79,29 @@ class PatientController extends Controller
             'kalori_harian' => $kalori_harian,
         ]);
 
-        return redirect()->route('admin.patients.index')->with('success', 'Pasien baru berhasil ditambahkan.');
+        return redirect()->route('ahli-gizi.patients.index')->with('success', 'Pasien baru berhasil ditambahkan.');
     }
 
-    public function show(Patient $patient)
+    public function show(Patient $patients)
     {
-        return view('admin.patient.show', compact('patient'));
+        return view('ahli-gizi.patients.show', compact('patients'));
     }
     /**
      * Menampilkan form untuk mengedit pasien.
      */
-    public function edit(Patient $patient)
+    public function edit(Patient $patients)
     {
-        return view('admin.patient.edit', compact('patient'));
+        return view('ahli-gizi.patients.edit', compact('patients'));
     }
 
     /**
      * Memperbarui data pasien.
      */
-    public function update(Request $request, Patient $patient)
+    public function update(Request $request, Patient $patients)
     {
         // Validasi data
         $request->validate([
-            'no_kamar' => 'required|unique:patients,no_kamar,' . $patient->id,
+            'no_kamar' => 'required|unique:patients,no_kamar,' . $patients->id,
             'nama_pasien' => 'required|string|max:255',
             'riwayat_penyakit' => 'required|string',
             'kalori_makanan' => 'required|integer|min:0',
@@ -118,7 +118,7 @@ class PatientController extends Controller
         $kalori_harian = $bmr + $this->adjustCaloriesBasedOnDisease($request->riwayat_penyakit);
 
         // Update data pasien
-        $patient->update([
+        $patients->update([
             'no_kamar' => $request->no_kamar,
             'nama_pasien' => $request->nama_pasien,
             'riwayat_penyakit' => $request->riwayat_penyakit,
@@ -133,39 +133,70 @@ class PatientController extends Controller
 
         ]);
 
-        return redirect()->route('admin.patients.index')->with('success', 'Data pasien berhasil diperbarui.');
+        return redirect()->route('ahli-gizi.patients.index')->with('success', 'Data pasien berhasil diperbarui.');
     }
 
-    public function filterByDate(Request $request)
-    {
-        $date = $request->query('date');
+    // public function filterByDate(Request $request)
+    // {
+    //     $date = $request->query('date');
 
-        if (!$date) {
-            return response()->json(['error' => 'Tanggal tidak valid'], 400);
-        }
+    //     if (!$date) {
+    //         return response()->json(['error' => 'Tanggal tidak valid'], 400);
+    //     }
 
-        $carbonDate = Carbon::parse($date)->toDateString();
+    //     $carbonDate = Carbon::parse($date)->toDateString();
         
-        // DEBUG: Cek apakah tanggal sudah dikonversi dengan benar
-        \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
+    //     // DEBUG: Cek apakah tanggal sudah dikonversi dengan benar
+    //     \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
 
-        // $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
-        //     ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
-        //     ->get();
-        $patients = Patient::where('status_pasien', 'aktif')
-            ->whereDate('created_at', '<=', $carbonDate)
-            ->get();
-        // DEBUG: Cek apakah data ditemukan
-        if ($patients->isEmpty()) {
-            \Log::info("Tidak ada pasien ditemukan untuk tanggal: " . $carbonDate);
-        }
+    //     // $patients = Patient::whereRaw("DATE(created_at) = ?", [$carbonDate])
+    //     //     ->orWhereRaw("DATE(updated_at) = ?", [$carbonDate])
+    //     //     ->get();
+    //     $patients = Patient::where('status_pasien', 'aktif')
+    //         ->whereDate('created_at', '<=', $carbonDate)
+    //         ->get();
+    //     // DEBUG: Cek apakah data ditemukan
+    //     if ($patients->isEmpty()) {
+    //         \Log::info("Tidak ada pasien ditemukan untuk tanggal: " . $carbonDate);
+    //     }
 
-        return response()->json($patients);
-    }
+    //     return response()->json($patients);
+    // }
 
     /**
      * Menghitung BMR (Basal Metabolic Rate) menggunakan rumus Mifflin-St Jeor.
      */
+    public function filterByDate(Request $request)
+    {
+        $date = $request->query('date');
+    
+        if (!$date) {
+            return response()->json(['error' => 'Tanggal tidak valid'], 400);
+        }
+    
+        try {
+            $carbonDate = Carbon::parse($date)->toDateString();
+        } catch (\Exception $e) {
+            \Log::error("Format tanggal tidak valid: " . $date);
+            return response()->json(['error' => 'Format tanggal tidak valid'], 400);
+        }
+    
+        \Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
+    
+        try {
+            $patients = Patient::where('status_pasien', 'aktif')
+                ->whereDate('created_at', '<=', $carbonDate)
+                ->get();
+    
+            \Log::info("Jumlah pasien ditemukan: " . $patients->count());
+    
+            return response()->json($patients);
+        } catch (\Exception $e) {
+            \Log::error("Gagal mengambil data pasien: " . $e->getMessage());
+            return response()->json(['error' => 'Terjadi kesalahan di server'], 500);
+        }
+    }
+    
     private function calculateBMR(Request $request)
     {
         $berat = $request->berat_badan; // dalam kg
@@ -214,9 +245,9 @@ class PatientController extends Controller
      * Menghapus pasien.
      * (Opsional, jika Anda ingin menyediakan fitur penghapusan pasien)
      */
-    public function destroy(Patient $patient)
+    public function destroy(Patient $patients)
     {
-        $patient->delete();
-        return redirect()->route('admin.patients.index')->with('success', 'Pasien berhasil dihapus.');
+        $patients->delete();
+        return redirect()->route('ahli-gizi.patients.index')->with('success', 'Pasien berhasil dihapus.');
     }
 }

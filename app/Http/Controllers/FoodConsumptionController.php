@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodConsumption;
 use App\Models\Patient;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 
 class FoodConsumptionController extends Controller
@@ -13,52 +14,71 @@ class FoodConsumptionController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'role:admin']);
+        $this->middleware(['auth', 'role:ahli-gizi']);
     }
 
     /**
      * Menyimpan konsumsi makanan baru.
      */
-    public function store(Request $request, $patient_id)
+    // public function store(Request $request, $patients_id)
+    // {
+    //     $patients = Patient::findOrFail($patients_id);
+
+    //     // Validasi data
+    //     $request->validate([
+    //         'nama_makanan' => 'required|string|max:255',
+    //         'kalori' => 'required|integer|min:0',
+    //     ]);
+
+    //     // Tambah konsumsi makanan
+    //     $patients->foodConsumptions()->create([
+    //         'nama_makanan' => $request->nama_makanan,
+    //         'kalori' => $request->kalori,
+    //     ]);
+
+    //     // Update kalori_makanan dan kalori_harian
+    //     $this->updatePatientCalories($patients);
+
+    //     return redirect()->route('ahli-gizi.patients.edit', $patients_id)->with('success', 'Makanan berhasil ditambahkan.');
+    // }
+
+    public function store(Request $request)
     {
-        $patient = Patient::findOrFail($patient_id);
-
-        // Validasi data
         $request->validate([
-            'nama_makanan' => 'required|string|max:255',
-            'kalori' => 'required|integer|min:0',
+            'patient_id' => 'required|exists:patients,id',
+            'menu_id' => 'required|exists:menus,id',
+            'waktu_makan' => 'required|in:pagi,siang,malam',
+            'tanggal' => 'required|date',
         ]);
 
-        // Tambah konsumsi makanan
-        $patient->foodConsumptions()->create([
-            'nama_makanan' => $request->nama_makanan,
-            'kalori' => $request->kalori,
+        FoodConsumption::create([
+            'patient_id' => $request->patient_id,
+            'menu_id' => $request->menu_id,
+            'waktu_makan' => $request->waktu_makan,
+            'tanggal' => $request->tanggal,
         ]);
 
-        // Update kalori_makanan dan kalori_harian
-        $this->updatePatientCalories($patient);
-
-        return redirect()->route('admin.patients.edit', $patient_id)->with('success', 'Makanan berhasil ditambahkan.');
+        return redirect()->route('ahli-gizi.dashboard')->with('success', 'Konsumsi makanan berhasil disimpan.');
     }
 
     /**
      * Menampilkan form edit konsumsi makanan.
      */
-    public function edit($patient_id, $food_id)
+    public function edit($patients_id, $food_id)
     {
-        $patient = Patient::findOrFail($patient_id);
-        $food = $patient->foodConsumptions()->findOrFail($food_id);
+        $patients = Patient::findOrFail($patients_id);
+        $food = $patients->foodConsumptions()->findOrFail($food_id);
 
-        return view('admin.food_consumptions.edit', compact('patient', 'food'));
+        return view('ahli-gizi.food_consumptions.edit', compact('patient', 'food'));
     }
 
     /**
      * Memperbarui konsumsi makanan.
      */
-    public function update(Request $request, $patient_id, $food_id)
+    public function update(Request $request, $patients_id, $food_id)
     {
-        $patient = Patient::findOrFail($patient_id);
-        $food = $patient->foodConsumptions()->findOrFail($food_id);
+        $patients = Patient::findOrFail($patients_id);
+        $food = $patients->foodConsumptions()->findOrFail($food_id);
 
         // Validasi data
         $request->validate([
@@ -73,44 +93,44 @@ class FoodConsumptionController extends Controller
         ]);
 
         // Update kalori_makanan dan kalori_harian
-        $this->updatePatientCalories($patient);
+        $this->updatePatientCalories($patients);
 
-        return redirect()->route('admin.patients.edit', $patient_id)->with('success', 'Makanan berhasil diperbarui.');
+        return redirect()->route('ahli-gizi.patients.edit', $patients_id)->with('success', 'Makanan berhasil diperbarui.');
     }
 
     /**
      * Menghapus konsumsi makanan.
      */
-    public function destroy($patient_id, $food_id)
+    public function destroy($patients_id, $food_id)
     {
-        $patient = Patient::findOrFail($patient_id);
-        $food = $patient->foodConsumptions()->findOrFail($food_id);
+        $patients = Patient::findOrFail($patients_id);
+        $food = $patients->foodConsumptions()->findOrFail($food_id);
 
         // Hapus konsumsi makanan
         $food->delete();
 
         // Update kalori_makanan dan kalori_harian
-        $this->updatePatientCalories($patient);
+        $this->updatePatientCalories($patients);
 
-        return redirect()->route('admin.patients.edit', $patient_id)->with('success', 'Makanan berhasil dihapus.');
+        return redirect()->route('ahli-gizi.patients.edit', $patients_id)->with('success', 'Makanan berhasil dihapus.');
     }
 
     /**
      * Memperbarui kalori_makanan dan kalori_harian pasien.
      */
-    private function updatePatientCalories(Patient $patient)
+    private function updatePatientCalories(Patient $patients)
     {
         // Hitung total kalori makanan
-        $total_kalori_makanan = $patient->foodConsumptions()->sum('kalori');
+        $total_kalori_makanan = $patients->foodConsumptions()->sum('kalori');
 
         // Hitung BMR
-        $bmr = $this->calculateBMR($patient);
+        $bmr = $this->calculateBMR($patients);
 
         // Hitung kalori harian
-        $kalori_harian = $bmr + $this->adjustCaloriesBasedOnDisease($patient->riwayat_penyakit);
+        $kalori_harian = $bmr + $this->adjustCaloriesBasedOnDisease($patients->riwayat_penyakit);
 
         // Update pasien
-        $patient->update([
+        $patients->update([
             'kalori_makanan' => $total_kalori_makanan,
             'kalori_harian' => $kalori_harian,
         ]);
@@ -120,12 +140,12 @@ class FoodConsumptionController extends Controller
     /**
      * Menghitung BMR (Basal Metabolic Rate) menggunakan rumus Mifflin-St Jeor.
      */
-    private function calculateBMR(Patient $patient)
+    private function calculateBMR(Patient $patients)
     {
-        $berat = $patient->berat_badan; // dalam kg
-        $tinggi = $patient->tinggi_badan; // dalam cm
-        $usia = $patient->usia; // dalam tahun
-        $jenis_kelamin = $patient->jenis_kelamin; // 'pria' atau 'wanita'
+        $berat = $patients->berat_badan; // dalam kg
+        $tinggi = $patients->tinggi_badan; // dalam cm
+        $usia = $patients->usia; // dalam tahun
+        $jenis_kelamin = $patients->jenis_kelamin; // 'pria' atau 'wanita'
 
         if ($jenis_kelamin === 'pria') {
             // Rumus Mifflin-St Jeor untuk pria
@@ -160,4 +180,14 @@ class FoodConsumptionController extends Controller
         }
         return $adjustment;
     }
+
+    public function create()
+    {
+        // ambil data pasien dan menu untuk pilihan dropdown
+        $patients = Patient::all();
+        $menus = Menu::all();
+
+        return view('ahli-gizi.food_consumptions.create', compact('patients', 'menus'));
+    }
+
 }
