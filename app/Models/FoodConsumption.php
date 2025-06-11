@@ -14,13 +14,15 @@ class FoodConsumption extends Model
         'nama_makanan',
         'kalori',
         'waktu_makan',
-        'status'
+        'status',
+        'menu_id',
+        'tanggal',
     ];
 
     /**
      * Relasi ke Patient.
      */
-    public function patients()
+    public function patient()
     {
         return $this->belongsTo(Patient::class);
     }
@@ -30,6 +32,6 @@ class FoodConsumption extends Model
      */
     public function menu()
     {
-        return $this->belongsTo(Menu::class, 'nama_makanan', 'nama_makanan');
+        return $this->belongsTo(Menu::class, 'menu_id'); // <--- KOREKSI INI
     }
 }

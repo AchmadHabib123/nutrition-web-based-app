@@ -77,7 +77,7 @@
                 <p class="text-gray-500 text-lg mt-4">Tipe Pasien: <strong>{{ $bahanMakanan->tipe_pasien }}</strong></p>
     
                 <div class="mt-6 flex justify-end">
-                    <a href="{{ route('ahli-gizi.bahan_makanans.edit', $bahanMakanan->id) }}" 
+                    <a href="{{ route('ahli-gizi.logistics.bahan_makanans.edit', $bahanMakanan->id) }}" 
                        class="bg-blue-500 text-white px-4 py-2 rounded inline-flex items-center">
                         <svg class="fill-current h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path d="M17.414 2.586a2 2 0 010 2.828l-2 2-2.828-2.828 2-2a2 2 0 012.828 0zm-3.828 3.828L5 15l-2.5.5.5-2.5L13.586 4l2.828 2.828z" />

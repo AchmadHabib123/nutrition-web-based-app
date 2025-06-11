@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BahanMakananController;
+use App\Http\Controllers\TenagaGiziPatientController;
+use App\Http\Controllers\TenagaGiziController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
@@ -76,10 +78,6 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
             'destroy' => 'destroy',
         ]);
     });
-    // Tambahkan rute admin lainnya di sini
-    // Route::resource('patients', PatientController::class);
-    // Route::resource('patients.food-consumptions', FoodConsumptionController::class)->only(['store', 'edit', 'update', 'destroy']);
-    // Route::get('/filter', [PatientController::class, 'filterByDate']);
     Route::prefix('patients')->name('patients.')->group(function () {
         // Perubahan rute filter ini
         Route::get('filter', [PatientController::class, 'filterByDate'])->name('filter'); // <--- PASTIKAN INI ADA DI SINI
@@ -107,32 +105,20 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
     Route::get('food-consumptions/create', [FoodConsumptionController::class, 'create'])->name('food-consumptions.create');
     Route::post('food-consumptions', [FoodConsumptionController::class, 'store'])->name('food-consumptions.store');
 });
-// Form manual untuk input FoodConsumption
-// Route::get('test-input-consumption', function () {
-//     return view('test_input_consumption');
-// })->name('test_input_consumption');
-
-// Route::post('/test-input-consumption', function (Request $request) {
-//     $request->validate([
-//         'patient_id' => 'required|integer|exists:patients,id',
-//         'nama_makanan' => 'required|string|max:255',
-//         'waktu_makan' => 'required|string|in:pagi,siang,malam',
-//         'kalori' => 'required|numeric|min:0',
-//     ]);
-
-//     FoodConsumption::create([
-//         'patient_id' => $request->patient_id,
-//         'nama_makanan' => $request->nama_makanan,
-//         'waktu_makan' => $request->waktu_makan,
-//         'kalori' => $request->kalori,
-//     ]);
-
-//     return redirect()->back()->with('success', 'Data berhasil disimpan!');
-// })->name('test-input-consumption.store');
-// Route::get('/api/nutrisi-chart/{id}', [JadwalMakananController::class, 'getNutrisiChart']);
 
 // Rute User
-Route::middleware(['auth', 'role:tenaga gizi'])->prefix('tenaga-gizi')->name('tenaga-gizi.')->group(function () {
+Route::middleware(['auth', 'role:tenaga-gizi'])->prefix('tenaga-gizi')->name('tenaga-gizi.')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     // Tambahkan rute user lainnya di sini
+    Route::prefix('patients')->name('patients.')->group(function () {
+        Route::get('filter', [TenagaGiziPatientController::class, 'filterByDate'])->name('filter');
+        Route::resource('/', TenagaGiziPatientController::class)->parameters([
+            '' => 'patients',
+        ])->names([
+            'index' => 'index',
+            'show' => 'show',
+        ]);
+    });
+    Route::get('food-delivery', [TenagaGiziController::class, 'index'])->name('food-delivery.index');
+    Route::post('food-delivery/{foodConsumption}/mark-delivered', [TenagaGiziController::class, 'markAsDelivered'])->name('food-delivery.mark-delivered');
 });

@@ -88,6 +88,80 @@
             </div>
         </div>
     </x-slot>
+    <div class="flex py-7">
+        <div class="sm:px-6 lg:px-5 w-3/4">
+            <div class="bg-white shadow-sm rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Analitik Stok (7 Hari Terakhir)</h3>
+                    {{-- Anda bisa menambahkan filter 'Weekly', 'Monthly' di sini nanti --}}
+                </div>
+                <div id="custom-legend" class="flex justify-end items-center gap-6 mb-4">
+                    <div class="legend-item cursor-pointer flex items-center gap-2">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span class="text-sm text-gray-600">Stok Masuk</span>
+                    </div>
+                    <div class="legend-item cursor-pointer flex items-center gap-2">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                        <span class="text-sm text-gray-600">Stok Keluar</span>
+                    </div>
+                </div>
+                <canvas id="stockChart" height="100"></canvas> {{-- Atur tinggi sesuai kebutuhan --}}
+            </div>
+        </div>
+        <div class="lg:col-span-1 bg-white shadow-sm rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Riwayat Terbaru</h3>
+            <div class="space-y-4">
+
+                @forelse($riwayatTerbaru as $riwayat)
+                    <div class="flex items-start gap-4">
+                        {{-- Lingkaran Status --}}
+                        <span class="mt-1 flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $riwayat->tipe == 'masuk' ? 'bg-green-400' : 'bg-red-400' }} opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 {{ $riwayat->tipe == 'masuk' ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                        </span>
+
+                        <div class="flex-1">
+                            {{-- Baris 1: Bahan Makanan & Waktu --}}
+                            <div class="flex justify-between items-center">
+                                <p class="font-semibold text-gray-700">
+                                    {{-- Tampilkan nama bahan makanan, jika relasi ada --}}
+                                    {{ $riwayat->bahanMakanan->nama ?? 'Bahan Dihapus' }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{-- Tampilkan waktu yang mudah dibaca --}}
+                                    {{ $riwayat->created_at->diffForHumans() }}
+                                </p>
+                            </div>
+                            
+                            {{-- Baris 2: Keterangan & Tipe Status --}}
+                            <div class="flex justify-between items-center mt-1">
+                                <p class="text-sm text-gray-600 italic">"{{ $riwayat->keterangan }}"</p>
+                                
+                                @if ($riwayat->tipe == 'masuk')
+                                    <span class="text-sm font-medium text-green-600">
+                                        Masuk (+{{ $riwayat->jumlah }})
+                                    </span>
+                                @else
+                                    <span class="text-sm font-medium text-red-600">
+                                        Keluar (-{{ $riwayat->jumlah }})
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-gray-500 text-sm">Belum ada riwayat stok.</p>
+                @endforelse
+
+            </div>
+        </div>
+    </div>
     <div class="py-7">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-7">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -173,6 +247,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const filterToggle = document.getElementById('filterToggle');
         const filterPanel = document.getElementById('filterPanel');
@@ -206,6 +281,79 @@
                 window.location.href = url;
             }
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            
+            // Mengambil data dari controller yang di-encode sebagai JSON
+            const chartData = @json($chartData);
+
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Stok Masuk',
+                        data: chartData.dataMasuk,
+                        borderColor: 'rgb(22, 163, 74)', // Hijau
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        pointBackgroundColor: 'rgb(22, 163, 74)',
+                        pointBorderWidth: 0,
+                        fill: true,
+                        tension: 0.4, // Membuat garis sedikit melengkung
+                    }, {
+                        label: 'Stok Keluar',
+                        data: chartData.dataKeluar,
+                        borderColor: 'rgb(220, 38, 38)', // Kuning/Oranye
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        pointBackgroundColor: 'rgb(220, 38, 38)',
+                        pointBorderWidth: 0,
+                        fill: true,
+                        tension: 0.5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    // Anda bisa memformat tanggal tooltip di sini jika perlu
+                                    return context[0].label;
+                                }
+                            }
+                        },
+                    }
+                }
+            });
+            const legendItems = document.querySelectorAll('#custom-legend .legend-item');
+            legendItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    // Cek apakah dataset sedang terlihat atau tidak
+                    const isVisible = myChart.isDatasetVisible(index);
+                    if (isVisible) {
+                        myChart.hide(index);
+                        item.style.textDecoration = 'line-through';
+                        item.style.color = '#9CA3AF'; // gray-400
+                    } else {
+                        myChart.show(index);
+                        item.style.textDecoration = 'none';
+                        item.style.color = '#4B5563'; // gray-600
+                    }
+                });
+            });
+        });
     </script>
     
 </x-app-layout>

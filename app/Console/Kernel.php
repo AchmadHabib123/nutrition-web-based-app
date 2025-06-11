@@ -4,15 +4,21 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\GenerateDailyFoodConsumptions;
 
 class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
      */
+
+     protected $commands = [
+        GenerateDailyFoodConsumptions::class, // Tambahkan ini
+    ];
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->command('generate:daily-food-consumptions')->dailyAt('00:00');
     }
 
     /**

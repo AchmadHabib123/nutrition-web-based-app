@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BahanMakanan extends Model
 {
@@ -25,5 +26,10 @@ class BahanMakanan extends Model
         return $this->belongsToMany(Menu::class, 'bahan_menu')
             ->withPivot('jumlah')
             ->withTimestamps();
+    }
+
+    public function riwayatStok(): HasMany
+    {
+        return $this->hasMany(RiwayatStokBahanMakanan::class, 'bahan_makanan_id');
     }
 }

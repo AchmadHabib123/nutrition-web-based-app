@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\BahanMakanan;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use App\Models\Menu;
 use App\Models\Patient;
+use App\Models\RiwayatStokBahanMakanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class BahanMakananController extends Controller
 {
@@ -94,14 +97,58 @@ class BahanMakananController extends Controller
             ->appends($request->all());
 
         $kategoriOptions = BahanMakanan::select('kategori_bahan_masakan')->distinct()->pluck('kategori_bahan_masakan');
+        $startDate = Carbon::now()->subDays(6)->startOfDay(); // Default: 7 hari terakhir
+    $endDate = Carbon::now()->endOfDay();
 
-        return view('ahli-gizi.logistics.index', compact('bahanMakanans', 'kategoriOptions'));
+    switch ($request->updated) {
+        case 'today':
+            $startDate = Carbon::today()->startOfDay();
+            break;
+        case 'last7':
+            // Sudah menjadi default
+            break;
+        case 'last30':
+            $startDate = Carbon::now()->subDays(29)->startOfDay();
+            break;
+        case 'custom':
+            if ($request->from && $request->to) {
+                $startDate = Carbon::createFromFormat('Y-m-d', $request->from)->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', $request->to)->endOfDay();
+            }
+            break;
     }
-    // public function show(Menu $bahanMakanan)
-    // {
-    //     $bahanMakanans = Menu::all();
-    //     return view('ahli-gizi.bahan_makanans.show', compact('bahan_makanans'));
-    // }
+
+    // 2. Buat periode tanggal untuk label dan mapping data
+    $period = CarbonPeriod::create($startDate, $endDate);
+    $dates = collect($period)->map(fn ($date) => $date->format('Y-m-d'));
+
+    // 3. Query data stok masuk dan keluar sesuai rentang tanggal
+    $stokMasuk = RiwayatStokBahanMakanan::where('tipe', 'masuk')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->select(DB::raw('DATE(created_at) as tanggal'), DB::raw('SUM(jumlah) as total'))
+        ->groupBy('tanggal')
+        ->pluck('total', 'tanggal');
+
+    $stokKeluar = RiwayatStokBahanMakanan::where('tipe', 'keluar')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->select(DB::raw('DATE(created_at) as tanggal'), DB::raw('SUM(jumlah) as total'))
+        ->groupBy('tanggal')
+        ->pluck('total', 'tanggal');
+
+    // 4. Siapkan data akhir untuk dikirim ke view
+    $chartData = [
+        'labels' => $dates->map(fn ($date) => Carbon::parse($date)->format('d M')), // Format label: "09 Jun"
+        'dataMasuk' => $dates->map(fn ($date) => $stokMasuk[$date] ?? 0),
+        'dataKeluar' => $dates->map(fn ($date) => $stokKeluar[$date] ?? 0),
+    ];
+    $riwayatTerbaru = RiwayatStokBahanMakanan::with('bahanMakanan')
+        ->latest() // Mengurutkan dari yang paling baru
+        ->limit(5) // Kita batasi hanya 5 entri terbaru
+        ->get();
+
+        return view('ahli-gizi.logistics.index', compact('bahanMakanans', 'kategoriOptions','chartData','riwayatTerbaru'));
+    }
+    
 
     public function show(BahanMakanan $bahanMakanan)
 {
@@ -251,6 +298,9 @@ class BahanMakananController extends Controller
             'stok' => 'required|integer|min:0',
         ]);
 
+        $stokLama = $bahanMakanan->stok;
+
+        // (Kode upload gambar Anda tetap di sini, tidak perlu diubah)
         if ($request->hasFile('gambar')) {
             // Hapus gambar lama
             if ($bahanMakanan->gambar) {
@@ -259,9 +309,41 @@ class BahanMakananController extends Controller
             $validated['gambar'] = $request->file('gambar')->store('images/bahan_makanans', 'public');
         }
 
+        // Update data utama bahan makanan dengan data yang sudah divalidasi
         $bahanMakanan->update($validated);
 
-        return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu makanan berhasil diperbarui!');
+        // 2. Ambil nilai stok BARU dari data yang sudah divalidasi
+        $stokBaru = $validated['stok'];
+
+        // 3. Hitung selisih dan buat catatan riwayat jika ada perubahan
+        $selisih = $stokBaru - $stokLama;
+
+        if ($selisih > 0) {
+            // Jika stok bertambah (stok masuk)
+            RiwayatStokBahanMakanan::create([
+                'bahan_makanan_id' => $bahanMakanan->id,
+                'tipe' => 'masuk',
+                'jumlah' => $selisih,
+                'satuan' => 'gram', // Sesuaikan jika Anda punya satuan dinamis
+                'keterangan' => 'Penambahan stok dari form edit.',
+            ]);
+        } elseif ($selisih < 0) {
+            // Jika stok berkurang (stok keluar)
+            RiwayatStokBahanMakanan::create([
+                'bahan_makanan_id' => $bahanMakanan->id,
+                'tipe' => 'keluar',
+                'jumlah' => abs($selisih), // Gunakan abs() untuk nilai positif
+                'satuan' => 'gram', // Sesuaikan jika Anda punya satuan dinamis
+                'keterangan' => 'Pengurangan stok dari form edit.',
+            ]);
+        }
+        // Jika selisih nol, tidak ada yang dicatat.
+
+        // ======================================================================
+        // >>> AKHIR LOGIKA PENCATATAN RIWAYAT STOK
+        // ======================================================================
+
+        return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Menu makanan berhasil diperbarui dan riwayat stok dicatat!');
     }
 
     // public function importCsv(Request $request)
@@ -293,38 +375,38 @@ class BahanMakananController extends Controller
     //     return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
     // }
     public function importCsv(Request $request)
-{
-    $request->validate([
-        'csv_file' => 'required|file|mimes:csv,txt|max:2048',
-    ]);
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
 
-    $file = $request->file('csv_file');
-    $path = $file->getRealPath();
-    
-    $csv = Reader::createFromPath($path, 'r');
-    $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
-    
-    $records = $csv->getRecords();
+        $file = $request->file('csv_file');
+        $path = $file->getRealPath();
+        
+        $csv = Reader::createFromPath($path, 'r');
+        $csv->setHeaderOffset(0); // Gunakan baris pertama sebagai header
+        
+        $records = $csv->getRecords();
 
-    foreach ($records as $record) {
-        // Pastikan nilai gambar tidak lebih dari 255 karakter
-        $imageUrl = $record['image'] ?? null; // Pastikan kolom ada dan tidak null
-        if ($imageUrl && strlen($imageUrl) > 255) {
-            $imageUrl = null; // Bisa juga diisi dengan gambar default jika diinginkan
+        foreach ($records as $record) {
+            // Pastikan nilai gambar tidak lebih dari 255 karakter
+            $imageUrl = $record['image'] ?? null; // Pastikan kolom ada dan tidak null
+            if ($imageUrl && strlen($imageUrl) > 255) {
+                $imageUrl = null; // Bisa juga diisi dengan gambar default jika diinginkan
+            }
+
+            BahanMakanan::create([
+                'nama' => $record['name'],
+                'protein' => (int) $record['proteins'],
+                'karbohidrat' => (int) $record['carbohydrate'],
+                'total_lemak' => (int) $record['fat'],
+                'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
+                'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
+                'gambar' => $imageUrl, // Simpan URL jika valid
+            ]);
         }
 
-        BahanMakanan::create([
-            'nama' => $record['name'],
-            'protein' => (int) $record['proteins'],
-            'karbohidrat' => (int) $record['carbohydrate'],
-            'total_lemak' => (int) $record['fat'],
-            'tipe_pasien' => 'Normal', // Bisa diubah sesuai kebutuhan
-            'kategori_bahan_masakan' => 'makanan_pokok', // Bisa dibuat aturan konversi
-            'gambar' => $imageUrl, // Simpan URL jika valid
-        ]);
+        return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
     }
-
-    return redirect()->route('ahli-gizi.logistics.index')->with('success', 'Data dari CSV berhasil diimpor!');
-}
 
 }

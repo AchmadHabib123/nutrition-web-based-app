@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('food_consumptions', function (Blueprint $table) {
-            $table->string('waktu_makan')->after('nama_makanan')->nullable();
-            $table->date('tanggal')->nullable()->after('patient_id');
+            $table->foreignId('menu_id')->nullable()->constrained('menus')->onDelete('set null');
         });
     }
 
@@ -23,8 +22,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('food_consumptions', function (Blueprint $table) {
-            $table->dropColumn('waktu_makan');
-            $table->dropColumn('tanggal');
+            $table->dropForeign(['menu_id']);
+            $table->dropColumn('menu_id');
         });
     }
 };

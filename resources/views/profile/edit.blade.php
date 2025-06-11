@@ -6,8 +6,8 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-5">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-5">
             @if (session('status') === 'profile-updated')
                 <div class="mb-4 font-medium text-sm text-green-600">
                     {{ __('Profile updated successfully.') }}

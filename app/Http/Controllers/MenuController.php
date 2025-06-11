@@ -48,20 +48,24 @@ class MenuController extends Controller
         if ($request->hasFile('gambar')) {
             $data['gambar'] = $request->file('gambar')->store('images/menus', 'public');
         }
-        $pivotData = [];
         $totalProtein = 0;
         $totalKarbohidrat = 0;
         $totalLemak = 0;
+        $pivotData = [];
 
         foreach ($request->bahan_makanans as $bahan) {
-            if (!isset($bahan['selected'])) continue;
+            // if (!isset($bahan['selected'])) continue;
 
             $bahanModel = BahanMakanan::find($bahan['id']);
             if ($bahanModel) {
-                $jumlah = $bahan['jumlah'] ?? 0;
-                $totalProtein += $bahanModel->protein * $jumlah;
-                $totalKarbohidrat += $bahanModel->karbohidrat * $jumlah;
-                $totalLemak += $bahanModel->total_lemak * $jumlah;
+                $jumlah = $bahan['jumlah'];
+                $proteinPerGram = $bahanModel->protein / 100;
+                $karbohidratPerGram = $bahanModel->karbohidrat / 100;
+                $lemakPerGram = $bahanModel->total_lemak / 100; // Asumsi total_lemak juga per 100gr
+
+                $totalProtein += $proteinPerGram * $jumlah;
+                $totalKarbohidrat += $karbohidratPerGram * $jumlah;
+                $totalLemak += $lemakPerGram * $jumlah;
 
                 $pivotData[$bahan['id']] = ['jumlah' => $jumlah];
             }

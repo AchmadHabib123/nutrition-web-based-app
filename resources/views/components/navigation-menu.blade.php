@@ -11,9 +11,9 @@
         {{ __('Pasien') }}
     </x-nav-link>
 
-    <x-nav-link href="{{ route('ahli-gizi.logistics.index') }}" :active="request()->routeIs('ahli-gizi.bahan_makanans.*')">
+    {{-- <x-nav-link href="{{ route('ahli-gizi.logistics.index') }}" :active="request()->routeIs('ahli-gizi.bahan_makanans.*')">
         {{ __('Menu') }}
-    </x-nav-link>
+    </x-nav-link> --}}
 
     <!-- Tambahkan link lainnya jika diperlukan -->
 </nav>

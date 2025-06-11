@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class LoginTest extends TestCase
 {
-    use RefreshDatabase;
+    // use RefreshDatabase;
 
     public function test_admin_can_login_and_redirect_to_admin_dashboard()
     {

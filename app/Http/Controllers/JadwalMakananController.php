@@ -8,6 +8,7 @@ use App\Models\JadwalMakanan;
 use App\Models\BahanMakanan;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 use App\Models\FoodConsumption;
 
@@ -18,6 +19,8 @@ class JadwalMakananController extends Controller
     public function index()
     {
         $jadwals = JadwalMakanan::withCount(['menus'])->latest()->get();
+
+        // KEMBALIKAN KE VIEW JADWAL MAKANAN
         return view('ahli-gizi.jadwal_makanans.index', compact('jadwals'));
     }
 
@@ -26,44 +29,6 @@ class JadwalMakananController extends Controller
         $menus = Menu::all();
         return view('ahli-gizi.jadwal_makanans.create', compact('menus'));
     }
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'tanggal_mulai' => 'required|date',
-    //         'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-    //         'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
-    //         'menus' => 'required|array',
-    //     ]);
-
-    //     // Simpan jadwal utama
-    //     $jadwal = JadwalMakanan::create([
-    //         'tanggal_mulai' => $request->tanggal_mulai,
-    //         'tanggal_selesai' => $request->tanggal_selesai,
-    //         'tipe_pasien' => $request->tipe_pasien,
-    //     ]);
-
-    //     $dataMenus = [];
-
-    //     foreach ($request->menus as $tanggal => $waktus) {
-    //         foreach ($waktus as $waktu => $menu_id) {
-    //             if ($menu_id) {
-    //                 $dataMenus[] = [
-    //                     'jadwal_makanan_id' => $jadwal->id,
-    //                     'menu_id' => $menu_id,
-    //                     'tanggal' => $tanggal,
-    //                     'waktu_makan' => $waktu,
-    //                     'created_at' => now(),
-    //                     'updated_at' => now(),
-    //                 ];
-    //             }
-    //         }
-    //     }
-
-    //     // Simpan ke tabel pivot
-    //     DB::table('jadwal_makanan_menu')->insert($dataMenus);
-
-    //     return redirect()->route('ahli-gizi.jadwal-makanans.create')->with('success', 'Jadwal makanan berhasil dibuat.');
-    // }
     public function store(Request $request)
     {
         $request->validate([
@@ -102,27 +67,6 @@ class JadwalMakananController extends Controller
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ];
-
-                            // Ambil data menu
-                            // $menu = Menu::find($menu_id);
-                            // if (!$menu || is_null($menu->kalori)) {
-                            //     Log::warning("Menu ID {$menu_id} tidak ditemukan atau kalori kosong. Melewati pembuatan konsumsi untuk menu ini.");
-                            //     continue; 
-                            // }
-
-                            // Buat record konsumsi makanan untuk setiap pasien aktif
-                            // foreach ($activePatients as $patient) {
-                            //     $dataConsumptions[] = [
-                            //         'patient_id' => $patient->id,
-                            //         'tanggal' => $tanggal,
-                            //         'waktu_makan' => $waktu,
-                            //         'nama_makanan' => $menu->nama,
-                            //         'kalori' => $menu->kalori, 
-                            //         'status' => 'planned', // Default status saat jadwal dibuat
-                            //         'created_at' => now(),
-                            //         'updated_at' => now(),
-                            //     ];
-                            // }
                         }
                     }
                 }
@@ -130,9 +74,6 @@ class JadwalMakananController extends Controller
                 if (!empty($dataMenus)) {
                     DB::table('jadwal_makanan_menu')->insert($dataMenus);
                 }
-                // if (!empty($dataConsumptions)) {
-                //     FoodConsumption::insert($dataConsumptions);
-                // }
             });
 
             return redirect()->route('ahli-gizi.jadwal-makanans.create')->with('success', 'Jadwal makanan dan rencana konsumsi berhasil dibuat.');
@@ -141,64 +82,6 @@ class JadwalMakananController extends Controller
             Log::error('Gagal menyimpan jadwal makanan dan konsumsi: ' . $e->getMessage() . ' - ' . $e->getFile() . ':' . $e->getLine());
             return back()->with('error', 'Terjadi kesalahan saat membuat jadwal makanan: ' . $e->getMessage());
         }
-        // Simpan jadwal utama
-        // $jadwal = JadwalMakanan::create([
-        //     'tanggal_mulai' => $request->tanggal_mulai,
-        //     'tanggal_selesai' => $request->tanggal_selesai,
-        //     'tipe_pasien' => $request->tipe_pasien,
-        // ]);
-
-        // $dataMenus = [];
-        // $dataConsumptions = [];
-
-        // $activePatients = Patient::where('status_pasien', 'aktif')
-        //                     ->where('tipe_pasien', $request->tipe_pasien)
-        //                     ->get();
-
-        // foreach ($request->menus as $tanggal => $waktus) {
-        //     foreach ($waktus as $waktu => $menu_id) {
-        //         if ($menu_id) {
-        //             $dataMenus[] = [
-        //                 'jadwal_makanan_id' => $jadwal->id,
-        //                 'menu_id' => $menu_id,
-        //                 'tanggal' => $tanggal,
-        //                 'waktu_makan' => $waktu,
-        //                 'created_at' => now(),
-        //                 'updated_at' => now(),
-        //             ];
-
-        //             $menu = Menu::find($menu_id);
-        //             if (!$menu || is_null($menu->kalori)) {
-        //                 continue; 
-        //             }
-
-        //             foreach ($activePatients as $patient) {
-        //                 $dataConsumptions[] = [
-        //                     'patient_id' => $patient->id,
-        //                     'tanggal' => $tanggal,
-        //                     'waktu_makan' => $waktu,
-        //                     'nama_makanan' => $menu->nama,
-        //                     'kalori' => $menu->kalori, 
-        //                     'status' => 'planned',
-        //                     'created_at' => now(),
-        //                     'updated_at' => now(),
-        //                 ];
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Simpan data ke pivot dan ke food_consumptions
-        // DB::table('jadwal_makanan_menu')->insert($dataMenus);
-        // FoodConsumption::insert($dataConsumptions);
-        // try {
-        //     DB::table('jadwal_makanan_menu')->insert($dataMenus);
-        //     FoodConsumption::insert($dataConsumptions);
-        // } catch (\Exception $e) {
-        //     return back()->with('error', 'Gagal simpan: ' . $e->getMessage());
-        // }
-
-        // return redirect()->route('ahli-gizi.jadwal-makanans.create')->with('success', 'Jadwal makanan berhasil dibuat.');
     }
 
     public function show($id)
@@ -269,27 +152,4 @@ class JadwalMakananController extends Controller
         return redirect()->route('ahli-gizi.jadwal-makanans.show', $jadwal->id)
             ->with('success', 'Jadwal berhasil diperbarui.');
     }
-
-
-
-    // public function byTanggal(Request $request)
-    // {
-    //     Log::info('Mencari data jadwal_makanan_menu berdasarkan tanggal: ' . $request->date);
-    
-    //     $result = DB::table('jadwal_makanan_menu')
-    //         ->join('jadwal_makanans', 'jadwal_makanan_menu.jadwal_makanan_id', '=', 'jadwal_makanans.id')
-    //         ->join('menus', 'jadwal_makanan_menu.menu_id', '=', 'menus.id')
-    //         ->whereDate('jadwal_makanan_menu.tanggal', $request->date)
-    //         ->select(
-    //             'jadwal_makanan_menu.*',
-    //             'menus.nama as nama_menu',
-    //             // 'jadwal_makanans'
-    //         )
-    //         ->get();
-    
-    //     return response()->json($result);
-    // }
-    
-
-
 }
