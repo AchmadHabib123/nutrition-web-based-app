@@ -12,6 +12,8 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\FoodConsumptionController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\JadwalMakananController;
+use App\Http\Controllers\AhliGizi\DietKhususController;
+use App\Http\Controllers\AhliGizi\StandarDiitController;
 use App\Models\FoodConsumption;
 
 // Halaman welcome
@@ -49,6 +51,7 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     // Route::get('/jadwal-makanan-per-tanggal', [JadwalMakananController::class, 'byTanggal'])->name('jadwal-makanan-per-tanggal');
     Route::resource('menus', MenuController::class);
+    Route::resource('standar-diit', StandarDiitController::class);
     Route::prefix('logistics')->name('logistics.')->group(function () {
         Route::get('/', [BahanMakananController::class, 'index'])->name('index');
         // Jika kamu ingin tambahkan resource untuk bahan_makanans dalam konteks logistics
@@ -92,7 +95,8 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
             'update' => 'update',
             'destroy' => 'destroy',
         ]);
-
+        Route::post('food-consumption/{foodConsumption}/validate', [PatientController::class, 'validateConsumption'])->name('food-consumption.validate');
+        Route::get('food-consumption/{foodConsumption}/menu-details', [PatientController::class, 'getFoodConsumptionMenuDetails'])->name('food-consumption.menu-details');
         Route::resource('food-consumptions', FoodConsumptionController::class)->only([
             'store', 'edit', 'update', 'destroy'
         ])->names([
@@ -102,8 +106,7 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
             'destroy' => 'food-consumptions.destroy',
         ]);
     });
-    Route::get('food-consumptions/create', [FoodConsumptionController::class, 'create'])->name('food-consumptions.create');
-    Route::post('food-consumptions', [FoodConsumptionController::class, 'store'])->name('food-consumptions.store');
+    Route::resource('diet-khusus', DietKhususController::class);
 });
 
 // Rute User

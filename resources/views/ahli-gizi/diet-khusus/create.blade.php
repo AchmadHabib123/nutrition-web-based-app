@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tambah Pasien Baru') }} {{-- Judul halaman Anda sebelumnya adalah Diet Khusus --}}
+            {{ __('Tambah Diet Khusus Baru') }}
         </h2>
     </x-slot>
 
@@ -9,14 +9,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('ahli-gizi.patients.store') }}" method="POST"> {{-- Pastikan action ke route patients --}}
+                    <form action="{{ route('ahli-gizi.diet-khusus.store') }}" method="POST">
                         @csrf
-                        @include('ahli-gizi.patients.form') {{-- <--- INCLUDE FORM.BLADE.PHP --}}
+                        @include('ahli-gizi.diet-khusus.form')
                         <div class="mt-4">
                             <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Simpan Pasien
+                                Simpan Diet Khusus
                             </button>
-                            <a href="{{ route('ahli-gizi.patients.index') }}" class="ml-2 text-gray-600 hover:text-gray-900">Batal</a>
+                            <a href="{{ route('ahli-gizi.diet-khusus.index') }}" class="ml-2 text-gray-600 hover:text-gray-900">Batal</a>
                         </div>
                     </form>
                 </div>

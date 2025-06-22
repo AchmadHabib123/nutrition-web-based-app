@@ -11,7 +11,9 @@ class CreateFoodConsumptionsTable extends Migration
         Schema::create('food_consumptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+            $table->date('tanggal');
             $table->string('nama_makanan');
+            $table->string('waktu_makan');
             $table->integer('kalori');
             $table->string('status')->default('planned');
             $table->timestamps();

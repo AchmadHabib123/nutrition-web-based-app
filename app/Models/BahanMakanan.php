@@ -19,11 +19,13 @@ class BahanMakanan extends Model
         'tipe_pasien',
         'kategori_bahan_masakan',
         'stok',
+        'standard_portion_value', // <--- TAMBAHKAN INI
+        'standard_portion_unit',
     ];
 
     public function menus()
     {
-        return $this->belongsToMany(Menu::class, 'bahan_menu')
+        return $this->belongsToMany(Menu::class, 'bahan_menu', 'bahan_makanan_id','bahan_menu')
             ->withPivot('jumlah')
             ->withTimestamps();
     }
@@ -32,4 +34,10 @@ class BahanMakanan extends Model
     {
         return $this->hasMany(RiwayatStokBahanMakanan::class, 'bahan_makanan_id');
     }
+
+    // public function getKaloriPer100gAttribute()
+    // {
+    //     // Kalori = (Protein * 4) + (Karbohidrat * 4) + (Lemak * 9)
+    //     return ($this->protein * 4) + ($this->karbohidrat * 4) + ($this->total_lemak * 9);
+    // }
 }

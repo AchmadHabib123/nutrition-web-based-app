@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Tambah Menu Makanan') }}
+            {{ __('Edit Menu Makanan') }}: {{ $menu->nama }}
         </h2>
     </x-slot>
 
@@ -20,29 +20,40 @@
             @endif
 
             <div class="bg-white p-6 shadow-sm rounded-lg">
-                <form action="{{ route('ahli-gizi.menus.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('ahli-gizi.menus.update', $menu->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
 
                     <div class="space-y-4">
                         {{-- Field Nama Menu --}}
                         <div class="mb-4">
                             <label class="block text-gray-700">Nama Menu</label>
-                            <input type="text" name="nama" class="w-full rounded border-gray-300" value="{{ old('nama') }}" required>
+                            <input type="text" name="nama" class="w-full rounded border-gray-300" value="{{ old('nama', $menu->nama) }}" required>
                             @error('nama') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         {{-- Field Deskripsi --}}
                         <div class="mb-4">
                             <label class="block text-gray-700">Deskripsi</label>
-                            <textarea name="deskripsi" class="w-full rounded border-gray-300">{{ old('deskripsi') }}</textarea>
+                            <textarea name="deskripsi" class="w-full rounded border-gray-300">{{ old('deskripsi', $menu->deskripsi) }}</textarea>
                             @error('deskripsi') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         {{-- Field Gambar --}}
                         <div class="mb-4">
-                            <label class="block text-gray-700">Gambar (Opsional)</label>
+                            <label class="block text-gray-700">Gambar Menu (Opsional)</label>
                             <input type="file" name="gambar" class="w-full rounded border-gray-300">
                             @error('gambar') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @if(isset($menu) && $menu->gambar)
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-600">Gambar saat ini:</p>
+                                    <img src="{{ Storage::url($menu->gambar) }}" alt="Gambar Menu" class="h-20 w-20 object-cover rounded-md">
+                                    <div class="mt-1 text-sm text-gray-600">
+                                        <input type="checkbox" name="delete_gambar" id="delete_gambar" value="1">
+                                        <label for="delete_gambar">Hapus gambar saat ini</label>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         {{-- Field Tipe Pasien --}}
@@ -50,9 +61,9 @@
                             <label class="block text-gray-700">Tipe Pasien</label>
                             <select name="tipe_pasien" class="w-full rounded border-gray-300" required>
                                 <option value="">Pilih Tipe Pasien</option>
-                                <option value="VVIP" @if(old('tipe_pasien') == 'VVIP') selected @endif>VVIP</option>
-                                <option value="VIP" @if(old('tipe_pasien') == 'VIP') selected @endif>VIP</option>
-                                <option value="Normal" @if(old('tipe_pasien') == 'Normal') selected @endif>Normal</option>
+                                <option value="VVIP" @if(old('tipe_pasien', $menu->tipe_pasien) == 'VVIP') selected @endif>VVIP</option>
+                                <option value="VIP" @if(old('tipe_pasien', $menu->tipe_pasien) == 'VIP') selected @endif>VIP</option>
+                                <option value="Normal" @if(old('tipe_pasien', $menu->tipe_pasien) == 'Normal') selected @endif>Normal</option>
                             </select>
                             @error('tipe_pasien') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -62,18 +73,36 @@
                         {{-- === Bagian Komposisi Bahan Makanan Dinamis === --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Komposisi Bahan Makanan</h3>
                         <div id="bahan-makanan-list" class="space-y-4">
-                            {{-- Item bahan makanan akan ditambahkan di sini oleh JavaScript --}}
                             @php
-                                // Untuk mode create, ambil data dari old input jika ada, atau mulai dengan baris kosong
-                                $initialBahanData = old('bahan_makanans', []);
-                                if (empty($initialBahanData)) {
-                                    $initialBahanData = [[]]; // Add one empty row for initial creation
+                                // Ambil bahan makanan yang sudah terpilih dari model Menu
+                                $existingBahanMakanans = $menu->bahanMakanans->map(function($bahan) {
+                                    return [
+                                        'id' => $bahan->id,
+                                        'jumlah' => $bahan->pivot->jumlah,
+                                        'selected' => true // Mark as selected for existing
+                                    ];
+                                })->toArray();
+                                // Gabungkan dengan old input jika ada validasi gagal
+                                $oldBahanMakanans = old('bahan_makanans', []);
+                                if (!empty($oldBahanMakanans)) {
+                                    $processedOldBahan = [];
+                                    foreach ($oldBahanMakanans as $bahanId => $data) {
+                                        if (isset($data['selected']) && $data['selected'] == '1') { // Only include if checkbox was checked
+                                            $processedOldBahan[] = [
+                                                'id' => $bahanId,
+                                                'jumlah' => $data['jumlah'] ?? '',
+                                                'selected' => true
+                                            ];
+                                        }
+                                    }
+                                    $initialBahanData = $processedOldBahan;
+                                } else {
+                                    $initialBahanData = $existingBahanMakanans;
                                 }
                             @endphp
-                            {{-- Loop untuk merender baris yang sudah ada (dari old input atau default kosong) --}}
                             @foreach($initialBahanData as $index => $bahanData)
                                 @include('ahli-gizi.menus.partials.bahan-makanan-row', [
-                                    'bahanMakanans' => $bahanMakanans, // Ini dari controller
+                                    'bahanMakanans' => $bahanMakanans,
                                     'index' => $index,
                                     'selectedBahanId' => $bahanData['id'] ?? '',
                                     'jumlah' => $bahanData['jumlah'] ?? '',
@@ -96,7 +125,7 @@
                             <select name="diet_khusus_ids[]" id="diet_khusus_ids" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" multiple>
                                 <option value="" disabled>Pilih Diet Khusus (Opsional)</option>
                                 @foreach($dietKhusus as $diet)
-                                    <option value="{{ $diet->id }}" @if(in_array($diet->id, old('diet_khusus_ids', []))) selected @endif>
+                                    <option value="{{ $diet->id }}" @if(in_array($diet->id, old('diet_khusus_ids', $selectedDietKhususIds ?? []))) selected @endif>
                                         {{ $diet->nama }}
                                     </option>
                                 @endforeach
@@ -105,7 +134,7 @@
                         </div>
                     </div> {{-- End of space-y-4 --}}
 
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Simpan Menu</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Perbarui Menu</button>
                 </form>
             </div>
         </div>
@@ -117,9 +146,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const bahanMakananList = document.getElementById('bahan-makanan-list');
             const addBahanBtn = document.getElementById('add-bahan-btn');
-            let bahanIndex = {{ isset($initialBahanData) ? count($initialBahanData) : 0 }}; // Mulai index setelah yang sudah ada
+            // Menentukan bahanIndex awal berdasarkan jumlah item yang sudah ada, untuk unique indexing
+            let bahanIndex = bahanMakananList.children.length;
 
-            // Data semua bahan makanan yang tersedia (dari controller)
+            // Data semua bahan makanan yang tersedia (dari controller, PHP ke JS)
             const allBahanMakanans = [
                 @foreach($bahanMakanans as $bahan)
                     {
@@ -136,6 +166,7 @@
                 const row = document.createElement('div');
                 row.classList.add('bahan-makanan-item', 'flex', 'flex-col', 'sm:flex-row', 'items-center', 'gap-2');
                 
+                // Generate options HTML for the select dropdown
                 let optionsHtml = '<option value="">Pilih Bahan Makanan</option>';
                 allBahanMakanans.forEach(bahan => {
                     optionsHtml += `<option value="${bahan.id}"
@@ -222,7 +253,8 @@
                 });
 
                 // Trigger change event for pre-selected items on load to set placeholder/value
-                if (selectElement.value && checkbox.checked) {
+                // Only if it's not a brand new empty row
+                if (selectedBahanId && checkbox.checked) { // Only trigger if it's an existing/pre-filled row and checked
                     selectElement.dispatchEvent(new Event('change'));
                 }
             }
@@ -233,6 +265,7 @@
             });
 
             // Initialize with existing data or one empty row
+            // Check if initialBahanData is provided (for edit mode)
             @if(isset($initialBahanData) && !empty($initialBahanData))
                 @foreach($initialBahanData as $bahanData)
                     createBahanMakananRowJs(
@@ -242,12 +275,14 @@
                     );
                 @endforeach
             @else
-                createBahanMakananRowJs(); // For initial empty row in create mode
+                // For create mode or empty initial data, add one empty row
+                createBahanMakananRowJs();
             @endif
 
-            // Ensure bahanIndex starts correctly for dynamic adding
-            bahanIndex = bahanMakananList.children.length; // Ensure unique indexing
+            // Ensure bahanIndex is correctly set after rendering initial items for unique names
+            // This needs to be outside the if/else for initialBahanData rendering logic
+            // and should be based on the actual number of children generated so far.
+            // bahanIndex is already incremented in createBahanMakananRowJs, so its final value is correct.
         });
     </script>
     @endpush
-</x-app-layout>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\StandarDiit; // <--- TAMBAHKAN INI
+use App\Models\DietKhusus;
 use App\Models\FoodConsumption;
 use App\Models\JadwalMakanan; // Pastikan ini diimpor
 use App\Models\Menu; // Pastikan ini diimpor
@@ -40,7 +42,9 @@ class PatientController extends Controller
      */
     public function create()
     {
-        return view('ahli-gizi.patients.create');
+        $standarDiits = StandarDiit::all(); // Ambil semua Standar Diit
+        $dietKhusus = DietKhusus::all(); // Ambil semua Diet Khusus
+        return view('ahli-gizi.patients.create', compact('standarDiits', 'dietKhusus'));
     }
 
     /**
@@ -53,13 +57,17 @@ class PatientController extends Controller
             'no_kamar' => 'required|unique:patients,no_kamar',
             'nama_pasien' => 'required|string|max:255',
             'riwayat_penyakit' => 'required|string',
-            'kalori_makanan' => 'required|integer|min:0',
+            // 'kalori_makanan' => 'required|integer|min:0',
             'berat_badan' => 'required|numeric|min:0',
             'tinggi_badan' => 'required|numeric|min:0',
             'usia' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:pria,wanita',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal', // Tambahkan validasi tipe_pasien
-            'status_pasien' => 'aktif',
+            'kondisi_diet_klinis' => 'nullable|string|max:255', // <--- TAMBAHKAN VALIDASI INI
+            'standar_diit_id' => 'nullable|exists:standar_diits,id', // <--- TAMBAHKAN VALIDASI INI
+            'diet_khusus_ids' => 'nullable|array', // <--- TAMBAHKAN VALIDASI INI
+            'diet_khusus_ids.*' => 'exists:diet_khusus,id',
+            // 'status_pasien' => 'aktif',
         ]);
 
         // Hitung kalori harian berdasarkan BMR dan riwayat penyakit
@@ -68,19 +76,23 @@ class PatientController extends Controller
         $kalori_harian = $bmr + $this->adjustCaloriesBasedOnDisease($request->riwayat_penyakit);
 
         // Buat pasien baru
-        Patient::create([
+        $patient = Patient::create([
             'no_kamar' => $request->no_kamar,
             'nama_pasien' => $request->nama_pasien,
             'riwayat_penyakit' => $request->riwayat_penyakit,
-            'kalori_makanan' => $request->kalori_makanan,
+            // 'kalori_makanan' => $request->kalori_makanan,
             'berat_badan' => $request->berat_badan,
             'tinggi_badan' => $request->tinggi_badan,
             'usia' => $request->usia,
             'jenis_kelamin' => $request->jenis_kelamin,
             'tipe_pasien' => $request->tipe_pasien,
+            'kondisi_diet_klinis' => $request->kondisi_diet_klinis, // <--- TAMBAHKAN INI
+            'standar_diit_id' => $request->standar_diit_id,
             'kalori_harian' => $kalori_harian,
-        ]);
+            'status_pasien' => 'aktif',
 
+        ]);
+        $patient->dietKhusus()->sync($request->input('diet_khusus_ids', []));
         return redirect()->route('ahli-gizi.patients.index')->with('success', 'Pasien baru berhasil ditambahkan.');
     }
 
@@ -114,7 +126,11 @@ class PatientController extends Controller
      */
     public function edit(Patient $patients)
     {
-        return view('ahli-gizi.patients.edit', compact('patients'));
+        $standarDiits = StandarDiit::all(); // Ambil semua Standar Diit
+        $dietKhusus = DietKhusus::all(); // Ambil semua Diet Khusus
+        // Ambil ID Diet Khusus yang sudah terpilih untuk pasien ini
+        $selectedDietKhususIds = $patients->dietKhusus->pluck('id')->toArray();
+        return view('ahli-gizi.patients.edit', compact('patients', 'standarDiits', 'dietKhusus', 'selectedDietKhususIds'));
     }
 
     /**
@@ -133,6 +149,10 @@ class PatientController extends Controller
             'usia' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:pria,wanita',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal', // Tambahkan validasi tipe_pasien
+            'kondisi_diet_klinis' => 'nullable|string|max:255', // <--- TAMBAHKAN VALIDASI INI
+            'standar_diit_id' => 'nullable|exists:standar_diits,id', // <--- TAMBAHKAN VALIDASI INI
+            'diet_khusus_ids' => 'nullable|array', // <--- TAMBAHKAN VALIDASI INI
+            'diet_khusus_ids.*' => 'exists:diet_khusus,id',
             'status_pasien' => 'required|in:aktif,nonaktif',
         ]);
 
@@ -151,107 +171,16 @@ class PatientController extends Controller
             'usia' => $request->usia,
             'jenis_kelamin' => $request->jenis_kelamin,
             'tipe_pasien' => $request->tipe_pasien,
+            'kondisi_diet_klinis' => $request->kondisi_diet_klinis, // <--- TAMBAHKAN INI
+            'standar_diit_id' => $request->standar_diit_id,
             'kalori_harian' => $kalori_harian,
             'status_pasien' => $request->status_pasien,
 
         ]);
-
+        $patients->dietKhusus()->sync($request->input('diet_khusus_ids', []));
         return redirect()->route('ahli-gizi.patients.index')->with('success', 'Data pasien berhasil diperbarui.');
     }
 
-    /**
-     * Menghitung BMR (Basal Metabolic Rate) menggunakan rumus Mifflin-St Jeor.
-     */
-    // public function filterByDate(Request $request)
-    // {
-    //     $date = $request->query('date');
-
-    //     if (!$date) {
-    //         return response()->json(['error' => 'Tanggal tidak valid'], 400);
-    //     }
-
-    //     try {
-    //         $carbonDate = Carbon::parse($date)->toDateString();
-    //     } catch (\Exception $e) {
-    //         Log::error("Format tanggal tidak valid: " . $date);
-    //         return response()->json(['error' => 'Format tanggal tidak valid'], 400);
-    //     }
-
-    //     Log::info("Mencari data pasien untuk tanggal: " . $carbonDate);
-
-    //     try {
-    //         $patients = Patient::where('status_pasien', 'aktif')
-    //             ->whereDate('created_at', '<=', $carbonDate) // Ini akan memfilter pasien berdasarkan tanggal dibuat, bukan jadwal makan
-    //             ->get();
-
-    //         // **TAMBAHKAN LOGIKA INI UNTUK MENGHITUNG KALORI TERJADWAL**
-    //         $responseData = [];
-    //         $totalScheduledCalories = 0;
-    //         $totalScheduledProtein = 0;
-    //         $totalScheduledCarbs = 0;
-    //         $totalScheduledFat = 0;
-    //         $totalTargetCalories = $patients->sum('kalori_harian');
-
-    //         foreach ($patients as $patient) {
-    //             $patientScheduledCalories = 0;
-    //             $patientScheduledProtein = 0;
-    //             $patientScheduledCarbs = 0;
-    //             $patientScheduledFat = 0;
-
-    //             // Ambil jadwal makanan yang berlaku untuk tanggal yang diminta dan sesuai dengan tipe pasien
-    //             $jadwalMakanans = JadwalMakanan::where('tipe_pasien', $patient->tipe_pasien)
-    //                 ->whereDate('tanggal_mulai', '<=', $carbonDate)
-    //                 ->whereDate('tanggal_selesai', '>=', $carbonDate)
-    //                 ->with(['menus' => function($query) use ($carbonDate) {
-    //                     // Hanya ambil menu yang dijadwalkan untuk tanggal yang diminta
-    //                     $query->wherePivot('tanggal', $carbonDate);
-    //                 }])
-    //                 ->get();
-
-    //             foreach ($jadwalMakanans as $jadwal) {
-    //                 foreach ($jadwal->menus as $menu) {
-    //                     $patientScheduledCalories += $menu->kalori;
-    //                     // Pastikan kolom ini ada di tabel 'menus'
-    //                     $patientScheduledProtein += $menu->total_protein ?? 0;
-    //                     $patientScheduledCarbs += $menu->total_karbohidrat ?? 0;
-    //                     $patientScheduledFat += $menu->total_lemak ?? 0;
-    //                 }
-    //             }
-
-    //             // Tambahkan properti ke objek pasien yang akan dikembalikan
-    //             $patient->kalori_makanan_hari_ini = $patientScheduledCalories;
-    //             $patient->protein_makanan_hari_ini = $patientScheduledProtein;
-    //             $patient->karbohidrat_makanan_hari_ini = $patientScheduledCarbs;
-    //             $patient->lemak_makanan_hari_ini = $patientScheduledFat;
-
-    //             // Akumulasikan total untuk dashboard (semua pasien)
-    //             $totalScheduledCalories += $patientScheduledCalories;
-    //             $totalScheduledProtein += $patientScheduledProtein;
-    //             $totalScheduledCarbs += $patientScheduledCarbs;
-    //             $totalScheduledFat += $patientScheduledFat;
-
-    //             $responseData[] = $patient->toArray();
-    //         }
-
-    //         // Mengembalikan respons dengan data pasien DAN data agregat untuk dashboard
-    //         return response()->json([
-    //             'patients' => $responseData,
-    //             'summary' => [
-    //                 'total_scheduled_calories' => $totalScheduledCalories,
-    //                 'total_target_calories' => $totalTargetCalories, // Hanya total kalori target yang ada
-    //                 'total_scheduled_protein' => $totalScheduledProtein,
-    //                 'total_scheduled_carbs' => $totalScheduledCarbs,
-    //                 'total_scheduled_fat' => $totalScheduledFat,
-    //             ]
-    //         ]);
-    //         // Log::info("Jumlah pasien ditemukan: " . $patients->count());
-
-    //         // return response()->json($patients);
-    //     } catch (\Exception $e) {
-    //         Log::error("Gagal mengambil data pasien: " . $e->getMessage());
-    //         return response()->json(['error' => 'Terjadi kesalahan di server'], 500);
-    //     }
-    // }
     public function filterByDate(Request $request)
     {
         $date = $request->query('date');
@@ -394,5 +323,114 @@ class PatientController extends Controller
     {
         $patients->delete();
         return redirect()->route('ahli-gizi.patients.index')->with('success', 'Pasien berhasil dihapus.');
+    }
+    public function getFoodConsumptionMenuDetails(FoodConsumption $foodConsumption)
+    {
+        // Pastikan user adalah ahli-gizi dan memiliki akses melihat konsumsi ini
+        // Meskipun tidak ada Policy spesifik untuk ini, kita bisa menggunakan Policy view
+        $this->authorize('view', $foodConsumption); // Asumsi policy 'view' ada
+
+        // Eager load menu dan bahanMakanans dari menu tersebut
+        $foodConsumption->load(['menu.bahanMakanans']);
+
+        if (!$foodConsumption->menu) {
+            Log::warning("Menu not found for FoodConsumption ID: {$foodConsumption->id}");
+            return response()->json(['message' => 'Detail menu tidak ditemukan untuk konsumsi ini.'], 404);
+        }
+
+        $menu = $foodConsumption->menu;
+        $bahanMakanans = [];
+
+        foreach ($menu->bahanMakanans as $bahan) {
+            // Hitung kalori per 100g dari bahan makanan
+            // Kolom 'protein', 'karbohidrat', 'total_lemak' di BahanMakanan diasumsikan per 100g
+            $kaloriPer100gBahan = ($bahan->protein * 4) + ($bahan->karbohidrat * 4) + ($bahan->total_lemak * 9);
+
+            // Hitung kontribusi nutrisi bahan makanan ini ke menu asli
+            $quantityInMenu = $bahan->pivot->jumlah; // Jumlah dalam gram bahan di 1 porsi menu
+            $contributionFactor = $quantityInMenu / 100; // Karena nutrisi bahan makanan per 100g
+
+            $bahanMakanans[] = [
+                'id' => $bahan->id,
+                'nama' => $bahan->nama,
+                'jumlah_di_menu_gram' => (float)$quantityInMenu,
+                'kalori_kontribusi_awal' => round($kaloriPer100gBahan * $contributionFactor, 2),
+                'protein_kontribusi_awal' => round($bahan->protein * $contributionFactor, 2),
+                'karbohidrat_kontribusi_awal' => round($bahan->karbohidrat * $contributionFactor, 2),
+                'lemak_kontribusi_awal' => round($bahan->total_lemak * $contributionFactor, 2),
+                // Data nutrisi per 100g juga bisa dikirim untuk perhitungan frontend
+                'protein_per_100g' => (float)$bahan->protein,
+                'karbohidrat_per_100g' => (float)$bahan->karbohidrat,
+                'lemak_per_100g' => (float)$bahan->total_lemak,
+                'kalori_per_100g' => round($kaloriPer100gBahan, 2),
+            ];
+        }
+
+        return response()->json([
+            'menu_details' => [
+                'nama_menu' => $menu->nama,
+                'original_kalori' => $menu->kalori,
+                'original_protein' => $menu->total_protein,
+                'original_karbohidrat' => $menu->total_karbohidrat,
+                'original_lemak' => $menu->total_lemak,
+                'bahan_makanans' => $bahanMakanans,
+            ],
+            'food_consumption_id' => $foodConsumption->id,
+        ]);
+    }
+    public function validateConsumption(Request $request, FoodConsumption $foodConsumption)
+    {
+        Log::info('DEBUG: validateConsumption START for ID: ' . $foodConsumption->id);
+        Log::info('DEBUG: Request data received: ' . json_encode($request->all()));
+
+        try {
+            // Pastikan otorisasi benar
+            $this->authorize('markAsConsumed', $foodConsumption);
+            Log::info('DEBUG: Authorization successful.');
+
+            // Validasi input
+            $request->validate([
+                'final_status' => 'required|in:consumed,skipped', // Perbaikan: hanya consumed/skipped sebagai final_status
+                'actual_kalori' => 'required|numeric|min:0',
+                'actual_protein' => 'required|numeric|min:0',
+                'actual_karbohidrat' => 'required|numeric|min:0',
+                'actual_lemak' => 'required|numeric|min:0',
+                'notes' => 'nullable|string|max:500',
+                'bahan_consumptions' => 'required|array', // Pastikan ini ada dan array
+                'bahan_consumptions.*.bahan_id' => 'required|integer|exists:bahan_makanans,id', // Validasi setiap item bahan
+                'bahan_consumptions.*.status' => 'required|in:consumed_full,partial,skipped',
+                'bahan_consumptions.*.sisa_gram' => 'nullable|numeric|min:0',
+            ]);
+            Log::info('DEBUG: Request validation passed.');
+
+            // Lakukan update
+            $foodConsumption->update([
+                'status' => $request->input('final_status'), // Menggunakan final_status dari request
+                'actual_kalori' => $request->input('actual_kalori'),
+                'actual_protein' => $request->input('actual_protein'),
+                'actual_karbohidrat' => $request->input('actual_karbohidrat'),
+                'actual_lemak' => $request->input('actual_lemak'),
+                // consumption_percentage tidak dikirim dari JS, jadi bisa null atau dihitung di sini
+                // 'consumption_percentage' => (original_kalori > 0) ? ($request->input('actual_kalori') / original_kalori * 100) : 0,
+                'notes' => $request->input('notes'),
+            ]);
+            Log::info('DEBUG: FoodConsumption updated successfully.');
+
+            // Opsional: Jika Anda perlu menyimpan detail konsumsi bahan per bahan,
+            // ini adalah tempat untuk itu (mungkin di tabel terpisah).
+            // Contoh: foreach ($request->input('bahan_consumptions') as $bahanData) { ... }
+
+            return response()->json(['message' => 'Validasi konsumsi berhasil disimpan.', 'food_consumption' => $foodConsumption], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('DEBUG: Validation Error for FoodConsumption ID ' . $foodConsumption->id . ': ' . json_encode($e->errors()));
+            return response()->json(['message' => 'Data validasi tidak valid.', 'errors' => $e->errors()], 422);
+        } catch (AuthorizationException $e) {
+            Log::warning('DEBUG: Authorization Failed for FoodConsumption ID ' . $foodConsumption->id . ': ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 403);
+        } catch (\Exception $e) {
+            Log::error('ERROR: Uncaught Exception in validateConsumption for ID ' . $foodConsumption->id . ': ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            return response()->json(['message' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
+        }
     }
 }

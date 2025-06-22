@@ -17,6 +17,12 @@ class FoodConsumption extends Model
         'status',
         'menu_id',
         'tanggal',
+        'actual_kalori',     
+        'actual_protein',      
+        'actual_karbohidrat',  
+        'actual_lemak',        
+        'consumption_percentage',
+        'notes',
     ];
 
     /**

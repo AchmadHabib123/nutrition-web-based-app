@@ -288,7 +288,7 @@
             const chartData = @json($chartData);
 
             const myChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: chartData.labels,
                     datasets: [{

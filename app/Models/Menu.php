@@ -22,7 +22,7 @@ class Menu extends Model
 
     public function bahanMakanans()
     {
-        return $this->belongsToMany(BahanMakanan::class, 'bahan_menu')
+        return $this->belongsToMany(BahanMakanan::class, 'bahan_menu', 'menu_id', 'bahan_makanan_id')
             ->withPivot('jumlah')
             ->withTimestamps();
     }
@@ -45,6 +45,11 @@ class Menu extends Model
                 $menu->calculateCalories();
             }
         });
+    }
+
+    public function dietKhusus()
+    {
+        return $this->belongsToMany(DietKhusus::class, 'menu_diet_khusus', 'menu_id', 'diet_khusus_id');
     }
 
     /**

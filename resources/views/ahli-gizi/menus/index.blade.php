@@ -7,6 +7,18 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- Notifikasi --}}
+            @if(session('success'))
+                <div class="mb-4 font-medium text-sm text-green-600">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="mb-4 font-medium text-sm text-red-600">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="bg-white p-6 shadow-sm rounded-lg">
                 <a href="{{ route('ahli-gizi.menus.create') }}" class="mb-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
                     + Tambah Menu
@@ -23,7 +35,19 @@
                                 <p><strong>Tipe Pasien:</strong> {{ $menu->tipe_pasien }}</p>
 
                                 @if($menu->gambar)
-                                    <img src="{{ asset('storage/' . $menu->gambar) }}" alt="Gambar Menu" class="w-32 h-32 object-cover mt-2">
+                                    <img src="{{ Storage::url($menu->gambar) }}" alt="Gambar Menu" class="w-32 h-32 object-cover mt-2">
+                                @endif
+
+                                {{-- === Tampilan Diet Khusus yang Kompatibel === --}}
+                                @if($menu->dietKhusus->isNotEmpty())
+                                    <div class="mt-2">
+                                        <h4 class="font-semibold text-gray-700">Kompatibel dengan Diet Khusus:</h4>
+                                        <div class="flex flex-wrap gap-2 mt-1">
+                                            @foreach($menu->dietKhusus as $diet)
+                                                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">{{ $diet->nama }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endif
 
                                 <div class="mt-4">
@@ -52,13 +76,23 @@
                                     </table>
                                 </div>
 
-                                @if ($menu->total_protein || $menu->total_karbohidrat || $menu->total_lemak)
+                                @if ($menu->kalori || $menu->total_protein || $menu->total_karbohidrat || $menu->total_lemak) {{-- Cek kalori juga --}}
                                     <div class="mt-4 text-sm text-gray-700">
+                                        <p><strong>Total Kalori:</strong> {{ $menu->kalori ?? 0 }} kcal</p> {{-- Menampilkan kalori --}}
                                         <p><strong>Total Protein:</strong> {{ $menu->total_protein ?? 0 }} gr</p>
                                         <p><strong>Total Karbohidrat:</strong> {{ $menu->total_karbohidrat ?? 0 }} gr</p>
                                         <p><strong>Total Lemak:</strong> {{ $menu->total_lemak ?? 0 }} gr</p>
                                     </div>
                                 @endif
+
+                                <div class="mt-4 flex space-x-2">
+                                    <a href="{{ route('ahli-gizi.menus.edit', $menu->id) }}" class="bg-green-500 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Edit</a>
+                                    <form action="{{ route('ahli-gizi.menus.destroy', $menu->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus menu ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">Hapus</button>
+                                    </form>
+                                </div>
                             </div>
                         @endforeach
                     </div>

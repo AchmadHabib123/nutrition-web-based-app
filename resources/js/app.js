@@ -1,6 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import './dashboardChart';
+import './validation-logic.js';
 
 window.Alpine = Alpine;
 

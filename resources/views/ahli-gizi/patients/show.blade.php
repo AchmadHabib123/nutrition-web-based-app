@@ -83,12 +83,9 @@
                                         @if (Auth::user()->can('markAsConsumed', $food) && $food->status === 'delivered')
                                             {{-- Tombol ini akan memicu modal validasi di Poin 4 --}}
                                             <button 
-                                                class="validate-food-btn bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs" 
+                                                class="validate-food-btn bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs"
                                                 data-id="{{ $food->id }}"
-                                                data-kalori-menu="{{ $food->menu->kalori ?? $food->kalori }}"
-                                                data-protein-menu="{{ $food->menu->total_protein ?? 0 }}"
-                                                data-carbs-menu="{{ $food->menu->total_karbohidrat ?? 0 }}"
-                                                data-fat-menu="{{ $food->menu->total_lemak ?? 0 }}"
+                                                data-menu-id="{{ $food->menu_id }}" {{-- Kirim menu_id ke JS --}}
                                                 data-nama-makanan="{{ $food->nama_makanan }}"
                                             >
                                                 Validasi Konsumsi
@@ -125,6 +122,7 @@
             </div>
         </div>
     </div>
+    @include('components.validation-modal')
 
     @push('scripts')
     <script>
@@ -143,18 +141,15 @@
             document.querySelectorAll('.validate-food-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const foodId = this.dataset.id;
-                    const kaloriMenu = parseFloat(this.dataset.kaloriMenu);
-                    const proteinMenu = parseFloat(this.dataset.proteinMenu);
-                    const carbsMenu = parseFloat(this.dataset.carbsMenu);
-                    const fatMenu = parseFloat(this.dataset.fatMenu);
                     const namaMakanan = this.dataset.namaMakanan;
+                    const menuId = this.dataset.menuId;
 
-                    // Untuk saat ini, kita akan menampilkan alert.
-                    // Di Poin 4, ini akan diganti dengan menampilkan modal validasi.
-                    alert(`Validasi Konsumsi:\nMakanan: ${namaMakanan}\nID: ${foodId}\nKalori Awal: ${kaloriMenu} kcal\nProtein Awal: ${proteinMenu} g\nKarbohidrat Awal: ${carbsMenu} g\nLemak Awal: ${fatMenu} g\n\nIni akan membuka form modal validasi.`);
-
-                    // Anda akan memanggil fungsi untuk menampilkan modal atau form validasi
-                    // showValidationModal(foodId, namaMakanan, kaloriMenu, proteinMenu, carbsMenu, fatMenu);
+                    // Panggil fungsi showValidationModal yang kini ada di validation-logic.js
+                    if (typeof showValidationModal !== 'undefined') {
+                        showValidationModal(foodId, namaMakanan, menuId);
+                    } else {
+                        alert('Error: showValidationModal is not defined. Pastikan resources/js/validation-logic.js dimuat dengan benar.');
+                    }
                 });
             });
         });
