@@ -76,9 +76,9 @@
                                     </table>
                                 </div>
 
-                                @if ($menu->kalori || $menu->total_protein || $menu->total_karbohidrat || $menu->total_lemak) {{-- Cek kalori juga --}}
+                                @if ($menu->kalori || $menu->total_protein || $menu->total_karbohidrat || $menu->total_lemak)
                                     <div class="mt-4 text-sm text-gray-700">
-                                        <p><strong>Total Kalori:</strong> {{ $menu->kalori ?? 0 }} kcal</p> {{-- Menampilkan kalori --}}
+                                        <p><strong>Total Kalori:</strong> {{ $menu->kalori ?? 0 }} kcal</p>
                                         <p><strong>Total Protein:</strong> {{ $menu->total_protein ?? 0 }} gr</p>
                                         <p><strong>Total Karbohidrat:</strong> {{ $menu->total_karbohidrat ?? 0 }} gr</p>
                                         <p><strong>Total Lemak:</strong> {{ $menu->total_lemak ?? 0 }} gr</p>

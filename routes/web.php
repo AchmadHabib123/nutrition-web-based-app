@@ -14,6 +14,8 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\JadwalMakananController;
 use App\Http\Controllers\AhliGizi\DietKhususController;
 use App\Http\Controllers\AhliGizi\StandarDiitController;
+use App\Http\Controllers\AhliGizi\SiklusMenuController;
+use Illuminate\Validation\Rule;
 use App\Models\FoodConsumption;
 
 // Halaman welcome
@@ -52,6 +54,7 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
     // Route::get('/jadwal-makanan-per-tanggal', [JadwalMakananController::class, 'byTanggal'])->name('jadwal-makanan-per-tanggal');
     Route::resource('menus', MenuController::class);
     Route::resource('standar-diit', StandarDiitController::class);
+    Route::resource('siklus-menu', SiklusMenuController::class);
     Route::prefix('logistics')->name('logistics.')->group(function () {
         Route::get('/', [BahanMakananController::class, 'index'])->name('index');
         // Jika kamu ingin tambahkan resource untuk bahan_makanans dalam konteks logistics
@@ -69,6 +72,7 @@ Route::middleware(['auth', 'role:ahli-gizi'])->prefix('ahli-gizi')->name('ahli-g
     });
     // });
     Route::prefix('jadwal-makanans')->name('jadwal-makanans.')->group(function () {
+        Route::get('recommendations', [JadwalMakananController::class, 'getRecommendations'])->name('recommendations');
         Route::resource('/', JadwalMakananController::class)->parameters([
             '' => 'jadwal_makanan',
         ])->names([

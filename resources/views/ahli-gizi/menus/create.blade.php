@@ -62,28 +62,12 @@
                         {{-- === Bagian Komposisi Bahan Makanan Dinamis === --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Komposisi Bahan Makanan</h3>
                         <div id="bahan-makanan-list" class="space-y-4">
-                            {{-- Item bahan makanan akan ditambahkan di sini oleh JavaScript --}}
-                            @php
-                                // Untuk mode create, ambil data dari old input jika ada, atau mulai dengan baris kosong
-                                $initialBahanData = old('bahan_makanans', []);
-                                if (empty($initialBahanData)) {
-                                    $initialBahanData = [[]]; // Add one empty row for initial creation
-                                }
-                            @endphp
-                            {{-- Loop untuk merender baris yang sudah ada (dari old input atau default kosong) --}}
-                            @foreach($initialBahanData as $index => $bahanData)
-                                @include('ahli-gizi.menus.partials.bahan-makanan-row', [
-                                    'bahanMakanans' => $bahanMakanans, // Ini dari controller
-                                    'index' => $index,
-                                    'selectedBahanId' => $bahanData['id'] ?? '',
-                                    'jumlah' => $bahanData['jumlah'] ?? '',
-                                    'isSelected' => $bahanData['selected'] ?? false,
-                                ])
-                            @endforeach
+                            {{-- Baris bahan makanan akan diinisialisasi oleh JavaScript --}}
                         </div>
                         <button type="button" id="add-bahan-btn" class="mt-4 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
                             Tambah Bahan Makanan
                         </button>
+                        {{-- Error messages for dynamic fields --}}
                         @error('bahan_makanans') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         @error('bahan_makanans.*.id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         @error('bahan_makanans.*.jumlah') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -117,7 +101,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const bahanMakananList = document.getElementById('bahan-makanan-list');
             const addBahanBtn = document.getElementById('add-bahan-btn');
-            let bahanIndex = {{ isset($initialBahanData) ? count($initialBahanData) : 0 }}; // Mulai index setelah yang sudah ada
+            let bahanIndex = 0; // Untuk indeks unik setiap baris form (dimulai dari 0 di create)
 
             // Data semua bahan makanan yang tersedia (dari controller)
             const allBahanMakanans = [
@@ -191,17 +175,12 @@
                         jumlahInput.removeAttribute('disabled');
                         selectElement.setAttribute('required', 'required');
                         jumlahInput.setAttribute('required', 'required');
-                        // Set hidden ID to current select value if checkbox is checked
                         hiddenIdInput.value = selectElement.value;
                     } else {
                         selectElement.setAttribute('disabled', 'disabled');
                         jumlahInput.setAttribute('disabled', 'disabled');
                         selectElement.removeAttribute('required');
                         jumlahInput.removeAttribute('required');
-                        // Clear values if unselected (optional, but good for clean data)
-                        // selectElement.value = ''; // Don't clear select value, just disable it
-                        // jumlahInput.value = '';
-                        // Clear hidden ID if checkbox is unchecked
                         hiddenIdInput.value = '';
                     }
                 });
@@ -217,7 +196,6 @@
                     if (portionValue && !jumlahInput.value) {
                         jumlahInput.value = portionValue;
                     }
-                    // Update hidden ID with the newly selected ID
                     hiddenIdInput.value = this.value;
                 });
 
@@ -229,12 +207,27 @@
 
             // Add Bahan button click
             addBahanBtn.addEventListener('click', function() {
-                createBahanMakananRowJs();
+                createBahanMakananRowJs('', '', false);
             });
 
-            // Initialize with existing data or one empty row
-            @if(isset($initialBahanData) && !empty($initialBahanData))
-                @foreach($initialBahanData as $bahanData)
+            // Initialize with existing data (for edit mode) or one empty row (for create mode)
+            // Di mode CREATE, initialBahanData akan selalu array kosong, jadi langsung create satu baris
+            // Jika ada old input setelah validasi gagal, old() akan menangani itu.
+            @if(old('bahan_makanans') && !empty(old('bahan_makanans')))
+                @php
+                    $oldBahanMakanans = old('bahan_makanans');
+                    $processedOldBahan = [];
+                    foreach ($oldBahanMakanans as $bahanId => $data) {
+                        if (isset($data['selected']) && $data['selected'] == '1') {
+                            $processedOldBahan[] = [
+                                'id' => $bahanId,
+                                'jumlah' => $data['jumlah'] ?? '',
+                                'selected' => true
+                            ];
+                        }
+                    }
+                @endphp
+                @foreach($processedOldBahan as $bahanData)
                     createBahanMakananRowJs(
                         '{{ $bahanData['id'] ?? '' }}',
                         '{{ $bahanData['jumlah'] ?? '' }}',
@@ -242,11 +235,11 @@
                     );
                 @endforeach
             @else
-                createBahanMakananRowJs(); // For initial empty row in create mode
+                createBahanMakananRowJs(); // Untuk baris kosong pertama di mode create
             @endif
 
-            // Ensure bahanIndex starts correctly for dynamic adding
-            bahanIndex = bahanMakananList.children.length; // Ensure unique indexing
+            // Pastikan bahanIndex diset dengan benar untuk penambahan dinamis selanjutnya
+            bahanIndex = bahanMakananList.children.length; // Set index berdasarkan jumlah elemen yang sudah ada
         });
     </script>
     @endpush

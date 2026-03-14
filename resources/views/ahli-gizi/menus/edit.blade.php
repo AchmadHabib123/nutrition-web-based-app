@@ -73,40 +73,47 @@
                         {{-- === Bagian Komposisi Bahan Makanan Dinamis === --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Komposisi Bahan Makanan</h3>
                         <div id="bahan-makanan-list" class="space-y-4">
+                            {{-- PHP Block untuk inisialisasi $initialBahanData --}}
                             @php
                                 // Ambil bahan makanan yang sudah terpilih dari model Menu
                                 $existingBahanMakanans = $menu->bahanMakanans->map(function($bahan) {
                                     return [
                                         'id' => $bahan->id,
                                         'jumlah' => $bahan->pivot->jumlah,
-                                        'selected' => true // Mark as selected for existing
+                                        'selected' => true // Tandai sudah terpilih
                                     ];
                                 })->toArray();
                                 // Gabungkan dengan old input jika ada validasi gagal
-                                $oldBahanMakanans = old('bahan_makanans', []);
-                                if (!empty($oldBahanMakanans)) {
-                                    $processedOldBahan = [];
-                                    foreach ($oldBahanMakanans as $bahanId => $data) {
-                                        if (isset($data['selected']) && $data['selected'] == '1') { // Only include if checkbox was checked
-                                            $processedOldBahan[] = [
-                                                'id' => $bahanId,
-                                                'jumlah' => $data['jumlah'] ?? '',
-                                                'selected' => true
-                                            ];
-                                        }
+                                $initialBahanData = old('bahan_makanans', $existingBahanMakanans); // Prioritaskan old input
+                                
+                                // Jika ada old input yang belum dicentang tapi ada di existing, pastikan tidak terduplikasi
+                                if (old('bahan_makanans') && !empty($existingBahanMakanans)) {
+                                    $mergedBahan = collect($existingBahanMakanans)->keyBy('id');
+                                    foreach (old('bahan_makanans') as $bahanId => $data) {
+                                        // Tambahkan atau timpa dengan data dari old input
+                                        $mergedBahan->put($bahanId, [
+                                            'id' => $bahanId,
+                                            'jumlah' => $data['jumlah'] ?? '',
+                                            'selected' => (bool)($data['selected'] ?? false) // Pastikan bool
+                                        ]);
                                     }
-                                    $initialBahanData = $processedOldBahan;
-                                } else {
-                                    $initialBahanData = $existingBahanMakanans;
+                                    $initialBahanData = $mergedBahan->values()->toArray(); // Reset keys
+                                }
+
+                                // Jika tidak ada bahan makanan sama sekali (baru atau edit tanpa bahan), tambahkan baris kosong
+                                if (empty($initialBahanData)) {
+                                    $initialBahanData = [[]];
                                 }
                             @endphp
+                            {{-- Loop untuk merender baris bahan makanan --}}
                             @foreach($initialBahanData as $index => $bahanData)
                                 @include('ahli-gizi.menus.partials.bahan-makanan-row', [
-                                    'bahanMakanans' => $bahanMakanans,
+                                    'bahanMakanans' => $bahanMakanans, // Variabel ini datang dari controller
                                     'index' => $index,
-                                    'selectedBahanId' => $bahanData['id'] ?? '',
-                                    'jumlah' => $bahanData['jumlah'] ?? '',
-                                    'isSelected' => $bahanData['selected'] ?? false,
+                                    // Gunakan data_get() untuk akses yang aman
+                                    'selectedBahanId' => data_get($bahanData, 'id', ''),
+                                    'jumlah' => data_get($bahanData, 'jumlah', ''),
+                                    'isSelected' => (bool)data_get($bahanData, 'selected', false),
                                 ])
                             @endforeach
                         </div>
@@ -146,10 +153,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             const bahanMakananList = document.getElementById('bahan-makanan-list');
             const addBahanBtn = document.getElementById('add-bahan-btn');
-            // Menentukan bahanIndex awal berdasarkan jumlah item yang sudah ada, untuk unique indexing
-            let bahanIndex = bahanMakananList.children.length;
+            let bahanIndex = 0; // Untuk indeks unik setiap baris form (akan diupdate setelah render initial)
 
-            // Data semua bahan makanan yang tersedia (dari controller, PHP ke JS)
+            // Data semua bahan makanan yang tersedia (dari controller)
             const allBahanMakanans = [
                 @foreach($bahanMakanans as $bahan)
                     {
@@ -166,7 +172,6 @@
                 const row = document.createElement('div');
                 row.classList.add('bahan-makanan-item', 'flex', 'flex-col', 'sm:flex-row', 'items-center', 'gap-2');
                 
-                // Generate options HTML for the select dropdown
                 let optionsHtml = '<option value="">Pilih Bahan Makanan</option>';
                 allBahanMakanans.forEach(bahan => {
                     optionsHtml += `<option value="${bahan.id}"
@@ -197,15 +202,15 @@
                 `;
                 bahanMakananList.appendChild(row);
 
-                // Setup event listeners for the newly added row
-                setupRowEventListeners(row);
+                setupRowEventListeners(row); // Setup event listeners for the new row
 
                 bahanIndex++; // Increment index for the next row
+                return row; // Return the created row for further use
             }
 
             // Function to setup event listeners for a single row
             function setupRowEventListeners(rowElement) {
-                // Remove button
+                // ... (Event listeners untuk remove, checkbox, select change) ...
                 rowElement.querySelector('.remove-bahan-btn').addEventListener('click', function() {
                     rowElement.remove();
                 });
@@ -215,29 +220,22 @@
                 const hiddenIdInput = rowElement.querySelector('input[type="hidden"]');
                 const checkbox = rowElement.querySelector('.bahan-selected-checkbox');
 
-                // Checkbox change: enable/disable inputs and manage required/hidden ID
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         selectElement.removeAttribute('disabled');
                         jumlahInput.removeAttribute('disabled');
                         selectElement.setAttribute('required', 'required');
                         jumlahInput.setAttribute('required', 'required');
-                        // Set hidden ID to current select value if checkbox is checked
                         hiddenIdInput.value = selectElement.value;
                     } else {
                         selectElement.setAttribute('disabled', 'disabled');
                         jumlahInput.setAttribute('disabled', 'disabled');
                         selectElement.removeAttribute('required');
                         jumlahInput.removeAttribute('required');
-                        // Clear values if unselected (optional, but good for clean data)
-                        // selectElement.value = ''; // Don't clear select value, just disable it
-                        // jumlahInput.value = '';
-                        // Clear hidden ID if checkbox is unchecked
                         hiddenIdInput.value = '';
                     }
                 });
 
-                // Bahan select change: suggest default portion and update hidden ID
                 selectElement.addEventListener('change', function() {
                     const selectedOption = this.options[this.selectedIndex];
                     const portionValue = selectedOption.dataset.portionValue;
@@ -248,41 +246,50 @@
                     if (portionValue && !jumlahInput.value) {
                         jumlahInput.value = portionValue;
                     }
-                    // Update hidden ID with the newly selected ID
                     hiddenIdInput.value = this.value;
                 });
 
                 // Trigger change event for pre-selected items on load to set placeholder/value
-                // Only if it's not a brand new empty row
-                if (selectedBahanId && checkbox.checked) { // Only trigger if it's an existing/pre-filled row and checked
+                if (selectElement.value && checkbox.checked) {
                     selectElement.dispatchEvent(new Event('change'));
                 }
             }
 
             // Add Bahan button click
             addBahanBtn.addEventListener('click', function() {
-                createBahanMakananRowJs();
+                createBahanMakananRowJs('', '', false);
             });
 
-            // Initialize with existing data or one empty row
-            // Check if initialBahanData is provided (for edit mode)
-            @if(isset($initialBahanData) && !empty($initialBahanData))
-                @foreach($initialBahanData as $bahanData)
-                    createBahanMakananRowJs(
-                        '{{ $bahanData['id'] ?? '' }}',
-                        '{{ $bahanData['jumlah'] ?? '' }}',
-                        {{ $bahanData['selected'] ? 'true' : 'false' }}
-                    );
-                @endforeach
-            @else
-                // For create mode or empty initial data, add one empty row
-                createBahanMakananRowJs();
-            @endif
-
-            // Ensure bahanIndex is correctly set after rendering initial items for unique names
-            // This needs to be outside the if/else for initialBahanData rendering logic
-            // and should be based on the actual number of children generated so far.
-            // bahanIndex is already incremented in createBahanMakananRowJs, so its final value is correct.
+            // --- Initialization Logic ---
+            // For Edit mode, $initialBahanData would be passed and rendered via Blade.
+            // For Create mode, $initialBahanData would be empty, so JS adds the first row.
+            
+            // Check if initial rows were rendered by Blade (for old input or existing data in edit mode)
+            // If not, it's a fresh create page, so add one empty row via JS.
+            if (bahanMakananList.children.length === 0) { // If container is empty after Blade rendering
+                createBahanMakananRowJs(); // Add one empty row
+            } else {
+                // If Blade rendered existing rows, setup their event listeners
+                bahanMakananList.querySelectorAll('.bahan-makanan-item').forEach(row => {
+                    // Get the current index from the input name to pass to setupRowEventListeners
+                    const selectElement = row.querySelector('.bahan-select');
+                    if (selectElement) { // Ensure element exists
+                        const nameAttr = selectElement.getAttribute('name');
+                        const currentIndexMatch = nameAttr.match(/\[(\d+)\]/);
+                        if (currentIndexMatch && currentIndexMatch[1]) {
+                            const currentIndex = parseInt(currentIndexMatch[1], 10);
+                            setupRowEventListeners(row, currentIndex);
+                            // Set global bahanIndex to be higher than existing max index
+                            if (currentIndex >= bahanIndex) {
+                                bahanIndex = currentIndex + 1;
+                            }
+                        }
+                    }
+                });
+            }
+            // If this is an old input scenario (after validation failure), ensure correct initial state
+            // The `initialBahanData` loop in Blade handles pre-filling, the JS sets up listeners.
         });
     </script>
     @endpush
+</x-app-layout>

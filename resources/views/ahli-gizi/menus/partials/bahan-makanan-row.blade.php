@@ -4,7 +4,7 @@
         {{-- Checkbox untuk menandakan bahan ini dipilih --}}
         <input type="checkbox" name="bahan_makanans[{{ $index }}][selected]" value="1" class="bahan-selected-checkbox" @if($isSelected) checked @endif>
         <label class="inline-block ml-2 text-sm font-medium text-gray-700">Pilih Bahan:</label>
-        <select name="bahan_makanans[{{ $index }}][id]" class="bahan-select mt-1 block w-full rounded-md border-gray-300 shadow-sm" @if(!$isSelected) disabled @endif> {{-- Disabled jika tidak terpilih --}}
+        <select name="bahan_makanans[{{ $index }}][id]" class="bahan-select mt-1 block w-full rounded-md border-gray-300 shadow-sm" @if(!$isSelected) disabled @endif required> {{-- Disabled jika tidak terpilih --}}
             <option value="">Pilih Bahan Makanan</option>
             @foreach($bahanMakanans as $bahan)
                 <option value="{{ $bahan->id }}"
@@ -22,7 +22,7 @@
     </div>
     <div class="w-full sm:w-1/4">
         <label for="jumlah_{{ $index }}" class="sr-only">Jumlah (gram)</label>
-        <input type="number" name="bahan_makanans[{{ $index }}][jumlah]" id="jumlah_{{ $index }}" class="bahan-jumlah mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ $jumlah }}" min="1" placeholder="Jumlah (gram)" @if(!$isSelected) disabled @endif required> {{-- Disabled jika tidak terpilih --}}
+        <input type="number" name="bahan_makanan[{{ $index }}][jumlah]" id="jumlah_{{ $index }}" class="bahan-jumlah mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="{{ $jumlah }}" min="1" placeholder="Jumlah (gram)" @if(!$isSelected) disabled @endif required> {{-- Disabled jika tidak terpilih --}}
     </div>
     <div class="w-full sm:w-1/4 flex justify-end">
         <button type="button" class="remove-bahan-btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-md text-sm">Hapus</button>

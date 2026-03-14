@@ -28,10 +28,15 @@ class MenuController extends Controller
      */
     public function create()
     {
-        $bahanMakanans = BahanMakanan::all();
-        $dietKhusus = DietKhusus::all(); // <--- Ambil semua Diet Khusus
-        return view('ahli-gizi.menus.create', compact('bahanMakanans', 'dietKhusus'));
-        // return view('ahli-gizi.menus.create', compact('bahanMakanans'));
+        $bahanMakanans = BahanMakanan::all(); // Semua bahan makanan untuk dropdown
+        $dietKhusus = DietKhusus::all(); // Semua diet khusus untuk multi-select
+        
+        // Untuk form create, tidak ada menu yang sudah ada, jadi null atau array kosong
+        $menu = null; // Agar view tidak error saat akses $menu->properti
+        $selectedDietKhususIds = []; // Tidak ada yang terpilih
+        $selectedBahanMakanansData = []; // Tidak ada bahan makanan awal
+        
+        return view('ahli-gizi.menus.create', compact('menu', 'bahanMakanans', 'dietKhusus', 'selectedDietKhususIds', 'selectedBahanMakanansData'));
     }
 
     /**
@@ -139,10 +144,38 @@ class MenuController extends Controller
      */
     public function edit(Menu $menu)
     {
-        $bahanMakanans = BahanMakanan::all(); // Untuk dropdown bahan makanan
-        $dietKhusus = DietKhusus::all(); // <--- Ambil semua Diet Khusus
-        $selectedDietKhususIds = $menu->dietKhusus->pluck('id')->toArray(); // <--- Ambil yang sudah terpilih
-        return view('ahli-gizi.menus.edit', compact('menu', 'bahanMakanans', 'dietKhusus', 'selectedDietKhususIds'));
+        $bahanMakanans = BahanMakanan::all(); // Semua bahan makanan untuk dropdown
+        $dietKhusus = DietKhusus::all(); // Semua diet khusus untuk multi-select
+        
+        $selectedDietKhususIds = $menu->dietKhusus->pluck('id')->toArray(); // ID Diet Khusus yang sudah terpilih
+
+        // Siapkan data bahan makanan yang sudah terpilih untuk form edit
+        $selectedBahanMakanansData = $menu->bahanMakanans->map(function($bahan) {
+            return [
+                'id' => $bahan->id,
+                'jumlah' => $bahan->pivot->jumlah,
+                'selected' => true // Tandai sudah terpilih
+            ];
+        })->toArray();
+        // Gabungkan dengan old input jika ada validasi gagal
+        if (old('bahan_makanans')) {
+            // Gunakan array_replace_recursive untuk menggabungkan old input dengan data existing,
+            // atau cukup ambil old input jika itu yang paling baru setelah gagal validasi
+            $processedOldBahan = [];
+            foreach (old('bahan_makanans') as $bahanId => $data) {
+                // Pastikan hanya bahan yang sebelumnya dicentang yang diproses dari old()
+                if (isset($data['selected']) && $data['selected'] == '1') {
+                    $processedOldBahan[] = [
+                        'id' => $bahanId,
+                        'jumlah' => $data['jumlah'] ?? '', // Ambil jumlah dari old input
+                        'selected' => true
+                    ];
+                }
+            }
+            $selectedBahanMakanansData = $processedOldBahan;
+        }
+
+        return view('ahli-gizi.menus.edit', compact('menu', 'bahanMakanans', 'dietKhusus', 'selectedDietKhususIds', 'selectedBahanMakanansData'));
     }
 
     /**
@@ -153,80 +186,73 @@ class MenuController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255|unique:menus,nama,' . $menu->id,
             'deskripsi' => 'nullable|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi file gambar
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'tipe_pasien' => 'required|in:VVIP,VIP,Normal',
-            'bahan_makanans' => 'required|array',
-            'bahan_makanans.*.id' => 'required|exists:bahan_makanans,id',
-            'bahan_makanans.*.jumlah' => 'required|numeric|min:1',
-            'diet_khusus_ids' => 'nullable|array', // <--- VALIDASI UNTUK DIET KHUSUS
+            'bahan_makanans' => 'nullable|array',
+            'bahan_makanans.*.selected' => 'nullable|boolean',
+            'bahan_makanans.*.id' => 'required_with:bahan_makanans.*.selected|exists:bahan_makanans,id',
+            'bahan_makanans.*.jumlah' => 'required_with:bahan_makanans.*.selected|numeric|min:1',
+            'diet_khusus_ids' => 'nullable|array',
             'diet_khusus_ids.*' => 'exists:diet_khusus,id',
         ]);
 
+        $data = $request->only(['nama', 'deskripsi', 'tipe_pasien']);
+        
         // Tangani gambar lama jika ada upload gambar baru
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
             if ($menu->gambar && Storage::disk('public')->exists($menu->gambar)) {
                 Storage::disk('public')->delete($menu->gambar);
             }
-            $menu->gambar = $request->file('gambar')->store('images/menus', 'public');
-        } elseif ($request->input('gambar_exist') === 'no_change' || $request->input('gambar_exist') === 'keep') {
-            // Jika tidak ada upload baru dan ingin mempertahankan gambar lama, tidak lakukan apa-apa
+            $data['gambar'] = $request->file('gambar')->store('images/menus', 'public');
+        } elseif ($request->boolean('delete_gambar')) { // Cek checkbox "hapus gambar saat ini"
+            if ($menu->gambar && Storage::disk('public')->exists($menu->gambar)) {
+                Storage::disk('public')->delete($menu->gambar);
+            }
+            $data['gambar'] = null;
         } else {
-            // Jika tidak ada upload baru dan gambar lama ingin dihapus (jika ada input checkbox "hapus gambar")
-            if ($menu->gambar && Storage::disk('public')->exists($menu->gambar)) {
-                Storage::disk('public')->delete($menu->gambar);
-            }
-            $menu->gambar = null;
+            $data['gambar'] = $menu->gambar; // Pertahankan gambar lama jika tidak ada perubahan
         }
-
 
         $totalProtein = 0;
         $totalKarbohidrat = 0;
         $totalLemak = 0;
         $pivotData = [];
 
-        foreach ($request->bahan_makanans as $bahanInput) {
-            $bahanModel = BahanMakanan::find($bahanInput['id']);
-            if ($bahanModel) {
-                $jumlah = $bahanInput['jumlah'];
-                $proteinPerGram = $bahanModel->protein / 100;
-                $karbohidratPerGram = $bahanModel->karbohidrat / 100;
-                $lemakPerGram = $bahanModel->total_lemak / 100;
-
-                $totalProtein += $proteinPerGram * $jumlah;
-                $totalKarbohidrat += $karbohidratPerGram * $jumlah;
-                $totalLemak += $lemakPerGram * $jumlah;
-
-                $pivotData[$bahanInput['id']] = ['jumlah' => $jumlah];
+        if ($request->has('bahan_makanans') && is_array($request->bahan_makanans)) {
+            foreach ($request->bahan_makanans as $bahanId => $bahanData) {
+                if (isset($bahanData['selected']) && $bahanData['selected'] == '1' && isset($bahanData['jumlah']) && $bahanData['jumlah'] >= 1) {
+                    $bahanModel = BahanMakanan::find($bahanId);
+                    if ($bahanModel) {
+                        $jumlah = (float)$bahanData['jumlah'];
+                        $totalProtein += ($bahanModel->protein / 100) * $jumlah;
+                        $totalKarbohidrat += ($bahanModel->karbohidrat / 100) * $jumlah;
+                        $totalLemak += ($bahanModel->total_lemak / 100) * $jumlah;
+                        $pivotData[$bahanId] = ['jumlah' => $jumlah];
+                    }
+                }
             }
         }
-
-        $menu->total_protein = round($totalProtein, 2);
-        $menu->total_karbohidrat = round($totalKarbohidrat, 2);
-        $menu->total_lemak = round($totalLemak, 2);
-        $menu->kalori = round(($menu->total_protein * 4) + ($menu->total_karbohidrat * 4) + ($menu->total_lemak * 9), 2);
-
-        // Update atribut Menu yang lain
-        $menu->nama = $request->nama;
-        $menu->deskripsi = $request->deskripsi;
-        $menu->tipe_pasien = $request->tipe_pasien;
-        // gambar sudah ditangani di atas
+        
+        $data['total_protein'] = round($totalProtein, 2);
+        $data['total_karbohidrat'] = round($totalKarbohidrat, 2);
+        $data['total_lemak'] = round($totalLemak, 2);
+        $data['kalori'] = round(($data['total_protein'] * 4) + ($data['total_karbohidrat'] * 4) + ($data['total_lemak'] * 9), 2);
 
         DB::beginTransaction();
         try {
-            $menu->save(); // Simpan perubahan pada model Menu
-
-            // Sinkronkan bahan makanan (pivot table)
+            $menu->update($data); // Update atribut Menu
             $menu->bahanMakanans()->sync($pivotData);
-
-            // Sinkronkan relasi many-to-many dietKhusus
-            $menu->dietKhusus()->sync($request->input('diet_khusus_ids', [])); // <--- TAUTKAN DIET KHUSUS
+            $menu->dietKhusus()->sync($request->input('diet_khusus_ids', []));
             
             DB::commit();
-            return redirect()->route('ahli-gizi.menus.index')->with('success', 'Menu berhasil diperbarui!'); // <--- KOREKSI ROUTE REDIRECT
+            return redirect()->route('ahli-gizi.menus.index')->with('success', 'Menu berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal memperbarui menu: ' . $e->getMessage() . ' - ' . $e->getFile() . ':' . $e->getLine());
+            // Jika ada gambar baru terupload tapi update gagal, hapus gambar baru tersebut
+            if (isset($data['gambar']) && Storage::disk('public')->exists($data['gambar']) && $data['gambar'] !== $menu->gambar) {
+                Storage::disk('public')->delete($data['gambar']);
+            }
             return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui menu: ' . $e->getMessage());
         }
     }

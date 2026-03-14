@@ -4,3 +4,91 @@
 .relative:hover .absolute {
     display: block;
 }
+
+.bg-custom-dark-purple {
+    background-color: #201a24;
+    /* A dark purple shade for the right side */
+}
+
+.bg-custom-teal {
+    background-color: #1ed7b6;
+    /* The teal color for the button */
+}
+
+.text-custom-light-green {
+    color: #55c8b5;
+    /* The light green for links */
+}
+
+.bg-custom-dark-blue {
+    background-image: url('/public/storage/assets/background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    border: none;
+}
+
+
+/* .swiper-button-prev,
+.swiper-button-next {
+    display: none;
+}
+
+.swiper {
+    position: relative;
+}
+
+.swiper-button-prev-custom,
+.swiper-button-next-custom {
+    position: relative;
+} */
+
+
+/* pindahkan tombol ke kanan bawah */
+
+.swiper-button-prev,
+.swiper-button-next {
+    top: auto;
+    bottom: 40px;
+}
+
+
+/* posisi kiri */
+
+.swiper-button-prev {
+    left: auto;
+    right: 110px;
+}
+
+
+/* posisi kanan */
+
+.swiper-button-next {
+    right: 40px;
+}
+
+
+/* ubah tampilan tombol */
+
+.swiper-button-prev,
+.swiper-button-next {
+    width: 55px;
+    height: 55px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    color: white;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    transition: all .3s;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+    font-size: 18px;
+    /* ukuran icon panah */
+    font-weight: bold;
+}

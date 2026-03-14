@@ -10,35 +10,122 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link 
+        rel="stylesheet" 
+        href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+        />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <style>
-            .bg-custom-dark-purple {
-                background-color: #201a24; /* A dark purple shade for the right side */
-            }
-            .bg-custom-teal {
-                background-color: #1ed7b6; /* The teal color for the button */
-            }
-            .text-custom-light-green {
-                color: #55c8b5; /* The light green for links */
-            }
-            .bg-custom-dark-blue-left {
-                background-color: #2b2b3a; /* Dark blue for the left panel */
-            }
-        </style>
     </head>
+    
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen grid grid-cols-2 sm:justify-center items-center pt-6 sm:pt-0 bg-custom-dark-blue-left">
-            <div class="flex flex-col items-center justify-center p-8 bg-custom-dark-blue-left text-white text-center">
-                <img src="{{ asset('storage/assets/login.png') }}" alt="Vibex Illustration" class="max-w-xs mx-auto mb-6">
-                <p class="text-xl leading-relaxed max-w-sm">
-                    Terwujudnya Upaya dan Pelayanan Kesehatan yang Berdayaguna, Berhasilguna dan Dipercaya
-                </p>
+        <div class="min-h-screen grid grid-cols-1 md:grid-cols-5 ">
+
+            <!-- LEFT SIDE LOGIN -->
+            <div class="flex items-center justify-center bg-gray-100 p-10 md:col-span-2">
+        
+                <div class="w-full max-w-md">
+        
+                    <h1 class="text-3xl font-bold mb-2">
+                        Hi there!
+                    </h1>
+        
+                    <p class="text-gray-500 mb-8">
+                        Welcome to {{ config('app.name') }}.
+                    </p>
+        
+                    {{ $slot }}
+        
+                </div>
+        
             </div>
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+        
+        
+            <!-- RIGHT SIDE IMAGE -->
+            <div class="hidden md:flex relative items-center justify-center text-white md:col-span-3">
+
+                <div class="swiper w-full h-full">
+            
+                    <div class="swiper-wrapper">
+            
+                        <!-- SLIDE 1 -->
+                        <div class="swiper-slide relative">
+                            <img src="{{ asset('storage/assets/background.png') }}"
+                                 class="absolute inset-0 w-full h-full object-cover">
+            
+                            <div class="absolute inset-0 bg-black/40"></div>
+            
+                            <div class="relative z-10 flex items-center h-full px-20">
+                                <h2 class="text-4xl font-bold max-w-lg">
+                                    Your laptop needs this new AI Technology
+                                </h2>
+                            </div>
+                        </div>
+            
+                        <!-- SLIDE 2 -->
+                        <div class="swiper-slide relative">
+                            <img src="{{ asset('storage/assets/bg2.jpg') }}"
+                                 class="absolute inset-0 w-full h-full object-cover">
+            
+                            <div class="absolute inset-0 bg-black/40"></div>
+            
+                            <div class="relative z-10 flex items-center h-full px-20">
+                                <h2 class="text-4xl font-bold max-w-lg">
+                                    Smart System For Modern Workflow
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div class="swiper-slide relative">
+                            <img src="{{ asset('storage/assets/background.png') }}"
+                                 class="absolute inset-0 w-full h-full object-cover">
+            
+                            <div class="absolute inset-0 bg-black/40"></div>
+            
+                            <div class="relative z-10 flex items-center h-full px-20">
+                                <h2 class="text-4xl font-bold max-w-lg">
+                                    Your laptop needs this ne
+                                </h2>
+                            </div>
+                        </div>
+            
+                    </div>
+            
+                    <!-- NAVIGATION BUTTON -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+
+                    <!-- DOT PAGINATION -->
+                    <div class="swiper-pagination"></div>
+            
+                </div>
+            
             </div>
+        
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     </body>
 </html>
+<script>
+    const swiper = new Swiper('.swiper', {
+    
+        loop: true,
+    
+        autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+        },
+    
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        }
+    
+    });
+</script>
